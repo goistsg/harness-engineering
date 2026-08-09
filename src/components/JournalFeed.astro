@@ -1,0 +1,39 @@
+---
+import ArticleCard from './ArticleCard.astro';
+import { groupByAxis, type Article } from '@/lib/journal';
+
+interface Props {
+  articles: readonly Article[];
+}
+
+const { articles } = Astro.props;
+const groups = groupByAxis(articles);
+---
+
+<div class="space-y-16">
+  {
+    groups.map(({ axis, articles: axisArticles }) => (
+      <section aria-labelledby={`eixo-${axis.id}`}>
+        <header class="max-w-2xl">
+          <h2
+            id={`eixo-${axis.id}`}
+            class="text-accent font-mono text-sm tracking-widest uppercase"
+          >
+            {axis.label}
+          </h2>
+          <p class="text-fg-muted mt-2">{axis.description}</p>
+        </header>
+
+        <div class="mt-6">
+          {axisArticles.length > 0 ? (
+            axisArticles.map((article) => <ArticleCard article={article} />)
+          ) : (
+            <p class="border-border text-fg-muted border-t py-6 font-mono text-sm">
+              Nenhum artigo publicado neste eixo ainda.
+            </p>
+          )}
+        </div>
+      </section>
+    ))
+  }
+</div>

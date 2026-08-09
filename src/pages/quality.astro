@@ -1,0 +1,61 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ScoreDashboard from '@/components/ScoreDashboard.astro';
+import { SITE } from '@/config/site';
+import { snapshot as score } from '@/lib/quality';
+---
+
+<BaseLayout
+  title="Qualidade"
+  description={`Maturidade de engenharia do repositório do ${SITE.name}, medida pelo harness-score a cada build: nível atual, dimensões avaliadas e as 36 verificações, incluindo as que falham.`}
+>
+  <div class="mx-auto max-w-4xl px-6 py-16">
+    <header class="max-w-2xl">
+      <p class="text-accent font-mono text-sm tracking-widest uppercase">Prova, não promessa</p>
+      <h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Qualidade</h1>
+      <p class="text-fg-muted mt-5 text-xl">
+        Esta página mostra o resultado do
+        <a
+          href="https://github.com/paladini/harness-score"
+          rel="noopener"
+          target="_blank"
+          class="text-accent underline decoration-1 underline-offset-2 hover:decoration-2"
+          >harness-score</a
+        > rodado neste próprio repositório, gerado durante o build. Nada aqui é digitado à mão.
+      </p>
+      <p class="text-fg-muted mt-4">
+        O CI reprova qualquer mudança que derrube o nível de maturidade. A decisão está registrada
+        em
+        <a
+          href={`${SITE.repository}/blob/main/spec/decisions/0001-adopt-harness-score.md`}
+          rel="noopener"
+          target="_blank"
+          class="text-accent underline decoration-1 underline-offset-2 hover:decoration-2"
+          >ADR 0001</a
+        >.
+      </p>
+    </header>
+
+    <div class="mt-14">
+      <ScoreDashboard />
+    </div>
+
+    <section class="border-border mt-16 border-t pt-8">
+      <h2 class="text-2xl font-bold tracking-tight">Por que publicar as falhas também?</h2>
+      <p class="text-fg-muted mt-4">
+        Porque um painel que só mostra verde não é medição, é propaganda. As verificações reprovadas
+        acima estão reprovadas de verdade — a alternativa seria excluí-las da conta pelo arquivo de
+        configuração da ferramenta, e essa exclusão não seria visível para você.
+      </p>
+      <p class="text-fg-muted mt-4">
+        A regra deste projeto: exclusão de verificação só é aceitável quando ela não se aplica ao
+        projeto, e sempre acompanhada de justificativa em ADR. Hoje o
+        <code class="text-fg font-mono text-base">.harness-score.json</code> não exclui nada.
+      </p>
+      <p class="text-fg-muted mt-6 font-mono text-sm">
+        Reproduza localmente: <code class="text-fg">npx harness-score</code> na raiz do repositório —
+        são {score.checks.length} verificações determinísticas, sem chamada a modelo.
+      </p>
+    </section>
+  </div>
+</BaseLayout>

@@ -1,0 +1,41 @@
+LICENÇA DO CONTEÚDO EDITORIAL
+=============================
+
+Copyright (c) 2026 Tiago Gois
+
+Os artigos e demais textos editoriais contidos neste diretório (`src/content/`)
+estão licenciados sob a licença
+
+    Creative Commons Atribuição-NãoComercial-CompartilhaIgual 4.0 Internacional
+    (CC BY-NC-SA 4.0)
+
+Texto integral: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.pt
+Resumo legível: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt-br
+
+Em resumo, você pode:
+
+  - COMPARTILHAR — copiar e redistribuir o material em qualquer suporte ou
+    formato;
+  - ADAPTAR — remixar, transformar e criar a partir do material.
+
+Desde que respeite as seguintes condições:
+
+  - ATRIBUIÇÃO — cite o autor (Tiago Gois), forneça um link para a licença e
+    indique se mudanças foram feitas, com link para o artigo original em
+    https://harnessengineering.com.br;
+  - NÃO COMERCIAL — não use o material para fins comerciais;
+  - COMPARTILHA IGUAL — se remixar ou transformar, distribua sob a mesma
+    licença.
+
+O CÓDIGO-FONTE do site (fora deste diretório) é licenciado sob MIT — ver o
+arquivo LICENSE na raiz do repositório.
+
+Uso do conteúdo por sistemas de IA
+----------------------------------
+
+O `robots.txt` deste site libera explicitamente crawlers de mecanismos
+generativos. Citação com atribuição e link é bem-vinda. Reprodução integral
+sem atribuição não é autorizada pela licença acima, com ou sem intermediação
+de modelo de linguagem.
+
+Para uso comercial, escreva para goistsg@gmail.com.

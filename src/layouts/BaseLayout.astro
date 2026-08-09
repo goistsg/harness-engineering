@@ -1,0 +1,121 @@
+---
+import { SITE, NAV_LINKS, AUTHOR } from '@/config/site';
+import '@/styles/global.css';
+
+// A fonte principal é descoberta tarde, porque o @font-face vem de um CSS
+// importado. Sem preload, o texto renderiza na fonte de fallback e reflui
+// quando a Inter chega — o que aparece como layout shift. Importar o arquivo
+// com `?url` devolve o caminho final com hash, gerado pelo próprio build.
+import interWoff2 from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Sobrescreve o canonical quando o conteúdo foi publicado antes em outro lugar. */
+  canonical?: string | undefined;
+  /** Injetado por ArticleLayout para acrescentar o JSON-LD do artigo. */
+  ogType?: 'website' | 'article';
+}
+
+const { title, description, canonical, ogType = 'website' } = Astro.props;
+
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
+const pageTitle = title === SITE.title ? title : `${title} — ${SITE.name}`;
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+
+<!doctype html>
+<html lang={SITE.language}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <link rel="preload" href={interWoff2} as="font" type="font/woff2" crossorigin="anonymous" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#18181B" />
+    <meta name="generator" content={Astro.generator} />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${SITE.name} — RSS`}
+      href={new URL('/rss.xml', Astro.site).href}
+    />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <slot name="head" />
+  </head>
+
+  <body class="flex min-h-screen flex-col">
+    <a
+      href="#conteudo"
+      class="bg-accent text-bg sr-only rounded px-4 py-2 font-medium focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50"
+    >
+      Pular para o conteúdo
+    </a>
+
+    <header class="border-border border-b">
+      <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-x-8 gap-y-3 px-6 py-5">
+        <a href="/" class="text-fg font-mono text-base font-bold tracking-tight">
+          <span class="text-accent">/</span>{SITE.name.toLowerCase().replace(' ', '-')}
+        </a>
+        <nav aria-label="Navegação principal" class="ml-auto">
+          <ul class="flex items-center gap-6 text-base">
+            {
+              NAV_LINKS.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    aria-current={currentPath.startsWith(link.href) ? 'page' : undefined}
+                    class:list={[
+                      'hover:text-fg transition-colors',
+                      currentPath.startsWith(link.href) ? 'text-accent' : 'text-fg-muted',
+                    ]}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="conteudo" class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="border-border mt-24 border-t">
+      <div
+        class="text-fg-muted mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-base"
+      >
+        <p>{SITE.name} — escrito por {AUTHOR.name}.</p>
+        <ul class="flex flex-wrap items-center gap-5">
+          <li><a href="/rss.xml" class="hover:text-fg transition-colors">RSS</a></li>
+          <li><a href="/quality" class="hover:text-fg transition-colors">Qualidade</a></li>
+          <li>
+            <a
+              href={SITE.repository}
+              rel="noopener"
+              target="_blank"
+              class="hover:text-fg transition-colors">Código-fonte</a
+            >
+          </li>
+        </ul>
+      </div>
+    </footer>
+  </body>
+</html>

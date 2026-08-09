@@ -1,0 +1,8 @@
+dist/
+.astro/
+node_modules/
+package-lock.json
+.lighthouseci/
+src/data/
+quality/baseline.json
+data/harness-history.json

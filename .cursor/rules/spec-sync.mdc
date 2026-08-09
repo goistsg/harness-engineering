@@ -1,0 +1,38 @@
+---
+description: Como manter a pasta spec viva e quando escrever um ADR
+globs: spec/**,docs/**
+alwaysApply: false
+---
+
+# A spec é fonte de verdade, não documentação póstuma
+
+`spec/` descreve o que o projeto **é e por quê**. `docs/` descreve **como operá-lo**.
+Se a implementação diverge da spec, um dos dois está errado — resolva, não acumule.
+
+## Quando atualizar o quê
+
+| Mudança | Atualize |
+| --- | --- |
+| Posicionamento, público, design system, plano de conteúdo | `spec/product-spec.md` |
+| Stack, hospedagem, integração, trade-off assumido | `spec/architecture.md` |
+| Regra editorial, GEO/SEO, formato de artigo | `spec/content-guidelines.md` |
+| Decisão estrutural com alternativa descartada | novo ADR em `spec/decisions/` |
+| Passo de instalação ou execução local | `docs/setup.md` |
+| Pipeline, ambiente, domínio, rollback | `docs/deployment.md` |
+
+## ADRs
+
+Nome: `NNNN-titulo-em-kebab-case.md`, numeração sequencial sem lacunas.
+
+Seções obrigatórias: **Status**, **Contexto**, **Decisão**, **Alternativas consideradas**,
+**Consequências**. As alternativas precisam ser reais, com o motivo concreto da rejeição —
+ADR sem alternativa descartada é anúncio, não decisão.
+
+**ADRs publicados são imutáveis.** Para mudar de ideia, escreva um novo ADR com
+`Status: Aceito` que marque o anterior como `Substituído por NNNN`. O hook
+`.claude/hooks/protect-spec.sh` bloqueia edição de ADR já commitado.
+
+## Tokens de design
+
+Os valores em `spec/product-spec.md` e no `@theme` de `src/styles/global.css` precisam
+bater. Mudou um, mude o outro no mesmo commit.

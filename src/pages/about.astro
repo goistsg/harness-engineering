@@ -1,0 +1,103 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE, AUTHOR, EDITORIAL_AXES } from '@/config/site';
+---
+
+<BaseLayout
+  title="Sobre"
+  description={`Sobre o ${SITE.name} e sobre ${AUTHOR.name}: o que este journal publica, o que não publica, e como entrar em contato.`}
+>
+  <div class="mx-auto max-w-3xl px-6 py-16">
+    <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Sobre</h1>
+
+    <section class="mt-10">
+      <h2 class="text-2xl font-bold tracking-tight">{AUTHOR.name}</h2>
+      {AUTHOR.headline && <p class="text-accent mt-1 font-mono text-sm">{AUTHOR.headline}</p>}
+
+      {/* O parágrafo biográfico só existe quando há texto real para exibir. */}
+      {AUTHOR.bio && <p class="text-fg-muted mt-4 text-lg">{AUTHOR.bio}</p>}
+
+      {
+        AUTHOR.sameAs.length > 0 && (
+          <ul class="mt-5 flex flex-wrap gap-4 font-mono text-sm">
+            {AUTHOR.sameAs.map((profile) => (
+              <li>
+                <a
+                  href={profile}
+                  rel="me noopener"
+                  target="_blank"
+                  class="text-accent underline decoration-1 underline-offset-2 hover:decoration-2"
+                >
+                  {profile.replace(/^https?:\/\//, '')}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </section>
+
+    <section class="mt-14">
+      <h2 class="text-2xl font-bold tracking-tight">O que este journal publica</h2>
+      <dl class="mt-6 space-y-6">
+        {
+          EDITORIAL_AXES.map((axis) => (
+            <div class="border-border border-l-2 pl-5">
+              <dt class="text-accent font-mono text-sm tracking-widest uppercase">{axis.label}</dt>
+              <dd class="text-fg-muted mt-2">{axis.description}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <p class="text-fg-muted mt-8">
+        O que não entra: notícia de release, resenha de ferramenta e opinião sobre linguagem de
+        programação.
+      </p>
+    </section>
+
+    <section class="mt-14">
+      <h2 class="text-2xl font-bold tracking-tight">Como este site funciona</h2>
+      <p class="text-fg-muted mt-4">
+        Site estático em Astro, conteúdo em MDX, deploy na Vercel. O código é público em
+        <a
+          href={SITE.repository}
+          rel="noopener"
+          target="_blank"
+          class="text-accent underline decoration-1 underline-offset-2 hover:decoration-2"
+        >
+          github.com/goistsg/harness-engineering
+        </a>, incluindo a pasta <code class="text-fg font-mono text-base">spec/</code>, onde ficam
+        as decisões de arquitetura com as alternativas descartadas.
+      </p>
+      <p class="text-fg-muted mt-4">
+        A maturidade de engenharia do próprio repositório é medida a cada push e publicada em
+        <a
+          href="/quality"
+          class="text-accent underline decoration-1 underline-offset-2 hover:decoration-2"
+          >/quality</a
+        >.
+      </p>
+    </section>
+
+    <section class="mt-14">
+      <h2 class="text-2xl font-bold tracking-tight">Contato</h2>
+      <p class="text-fg-muted mt-4">
+        Correção, discordância técnica ou sugestão de pauta:
+        <a
+          href={`mailto:${SITE.securityContact}`}
+          class="text-accent underline decoration-1 underline-offset-2 hover:decoration-2"
+        >
+          {SITE.securityContact}
+        </a>. Vulnerabilidade de segurança segue o processo descrito em
+        <a
+          href={`${SITE.repository}/blob/main/SECURITY.md`}
+          rel="noopener"
+          target="_blank"
+          class="text-accent underline decoration-1 underline-offset-2 hover:decoration-2"
+          >SECURITY.md</a
+        >.
+      </p>
+    </section>
+  </div>
+</BaseLayout>

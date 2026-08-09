@@ -1,0 +1,108 @@
+---
+title: Manifesto — por que este journal existe
+description: Um journal técnico que mede a própria maturidade em público, porque conselho de engenharia sem evidência verificável é só opinião bem formatada.
+pubDate: 2026-08-09
+axis: ia-na-pratica
+tags: ['manifesto', 'harness', 'qualidade']
+draft: false
+---
+
+import Callout from '@/components/Callout.astro';
+import Mermaid from '@/components/Mermaid.astro';
+
+Existe muito conteúdo sobre engenharia de software escrito por quem não precisa
+conviver com as consequências do que recomenda. O padrão é conhecido: um artigo
+descreve uma prática, cita três benefícios, não mostra um único número, e termina
+sugerindo que o leitor "avalie o contexto".
+
+Este journal parte de uma restrição diferente: **toda afirmação precisa de um
+mecanismo, e sempre que possível de uma medida.** Quando eu não tiver a medida,
+vou dizer que não tenho.
+
+## O que este site publica?
+
+Três eixos, e nada além deles:
+
+- **Liderança & Squads** — como times de software realmente funcionam. Autonomia,
+  ritmo, contratos entre squads, e o custo de coordenação que ninguém coloca na
+  planilha.
+- **IA na Prática** — modelos e agentes em produção. Harness, avaliação, guardrails,
+  e o que sobrevive ao contato com usuários reais.
+- **Arquitetura & Segurança** — decisões estruturais e suas consequências. Limites
+  de sistema, falhas previsíveis, segurança como propriedade de design em vez de
+  camada aplicada no fim.
+
+O que não entra: notícia de release, resenha de ferramenta, e opinião sobre
+linguagem de programação.
+
+## Por que o repositório é público?
+
+Porque um site que dá conselho sobre qualidade de engenharia e esconde o próprio
+código está pedindo confiança que não ofereceu. O código deste site está em
+[github.com/goistsg/harness-engineering](https://github.com/goistsg/harness-engineering),
+incluindo a pasta `spec/`, onde ficam as decisões de arquitetura com as
+alternativas que foram descartadas e o motivo.
+
+Mas repositório público é fácil. O compromisso real é o próximo.
+
+## O que significa medir a própria maturidade em público?
+
+Este repositório roda o [harness-score](https://github.com/paladini/harness-score)
+a cada push: uma varredura determinística, sem chamada a modelo, que avalia 36
+verificações objetivas em seis dimensões e devolve um nível de maturidade de L0 a
+L4. O resultado fica em [/quality](/quality), atualizado a cada build.
+
+O número não é decorativo. Ele é um gate:
+
+<Mermaid
+  chart={`graph LR
+    A[Push ou PR] --> B[Lint · Typecheck · Testes]
+    B --> C[harness-score]
+    C -->|nivel mantido| D[Merge liberado]
+    C -->|nivel caiu| E[Build reprovado]`}
+  caption="Regressão de maturidade reprova o build — não vira sugestão para depois"
+/>
+
+Se uma mudança derruba o nível de maturidade do repositório, o build falha. Não
+aparece como aviso amarelo que todo mundo aprende a ignorar em duas semanas.
+
+<Callout type="insight" title="O ponto que interessa">
+  Qualidade que não é medida por uma máquina em cada commit vira preferência pessoal — e preferência
+  pessoal perde toda discussão contra prazo.
+</Callout>
+
+## E quando a métrica for inconveniente?
+
+No primeiro scan, este repositório reprovou em uma verificação chamada `HYG-08`:
+ela premia repositórios cuja configuração de MCP referencia credenciais por
+interpolação de variável de ambiente, em vez de valores literais.
+
+Este site é estático e não tem configuração de MCP. Eu poderia adicionar um
+arquivo vazio só para pontuar. Não vou:
+
+```jsonc
+// .harness-score.json — o que NÃO está aqui também é uma decisão
+{
+  // Nenhuma exclusão. HYG-08 fica reprovado porque o projeto realmente
+  // não usa MCP, e inventar um arquivo para ganhar 3 pontos transformaria
+  // a página /quality em propaganda.
+}
+```
+
+O resultado é que o score fica em 105 de 108 pontos possíveis, e a página
+`/quality` mostra essa verificação em vermelho. Prefiro assim. Uma métrica que
+só sobe quando é conveniente não mede nada — mede a disposição de quem a
+publica em parecer bem.
+
+## O contrato
+
+Três compromissos, verificáveis:
+
+1. **Toda afirmação técnica vem com o mecanismo que a sustenta.** Sem "é mais
+   rápido" sem causa ou número.
+2. **Decisão estrutural vira ADR**, com a alternativa descartada e o motivo. Em
+   `spec/decisions/`, imutáveis depois de publicados.
+3. **O gate de qualidade não é afrouxado para acomodar um artigo.** Se este site
+   quebrar as próprias regras, o build falha, e isso é visível em público.
+
+O primeiro artigo de verdade vem em seguida. Este aqui é o contrato.

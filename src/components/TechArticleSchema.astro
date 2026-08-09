@@ -1,0 +1,47 @@
+---
+import { SITE, AUTHOR } from '@/config/site';
+
+interface Props {
+  headline: string;
+  description: string;
+  datePublished: Date;
+  dateModified?: Date | undefined;
+  url: string;
+  keywords: readonly string[];
+  section: string;
+}
+
+const { headline, description, datePublished, dateModified, url, keywords, section } = Astro.props;
+
+/**
+ * JSON-LD TechArticle. Toda autoria vem de src/config/site.ts — campo vazio é
+ * omitido do grafo em vez de virar string vazia no HTML público.
+ */
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline,
+  description,
+  datePublished: datePublished.toISOString(),
+  ...(dateModified ? { dateModified: dateModified.toISOString() } : {}),
+  inLanguage: SITE.language,
+  url,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+  author: {
+    '@type': 'Person',
+    name: AUTHOR.name,
+    ...(AUTHOR.headline ? { jobTitle: AUTHOR.headline } : {}),
+    ...(AUTHOR.sameAs.length > 0 ? { sameAs: [...AUTHOR.sameAs] } : {}),
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: SITE.name,
+    url: SITE.url,
+  },
+  ...(keywords.length > 0 ? { keywords: keywords.join(', ') } : {}),
+  articleSection: section,
+  isAccessibleForFree: true,
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />

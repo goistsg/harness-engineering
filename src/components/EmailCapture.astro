@@ -1,0 +1,53 @@
+---
+/**
+ * Captura de e-mail com provedor plugável.
+ *
+ * Sem `PUBLIC_NEWSLETTER_ACTION_URL` definida, renderiza o estado "em breve" em
+ * vez de um formulário que não envia para lugar nenhum. Trocar de provedor é
+ * mudar uma variável de ambiente — ver docs/setup.md.
+ */
+const actionUrl = import.meta.env.PUBLIC_NEWSLETTER_ACTION_URL ?? '';
+const isConfigured = actionUrl.length > 0;
+---
+
+<section
+  class="border-border bg-surface rounded-lg border p-8"
+  aria-labelledby="newsletter-heading"
+>
+  <h2 id="newsletter-heading" class="text-2xl font-bold tracking-tight">
+    Receba os artigos por e-mail
+  </h2>
+  <p class="text-fg-muted mt-3 max-w-2xl">
+    Um e-mail quando sai artigo novo. Sem newsletter semanal, sem resumo de links, sem curadoria de
+    terceiros.
+  </p>
+
+  {
+    isConfigured ? (
+      <form action={actionUrl} method="post" class="mt-6 flex flex-wrap gap-3">
+        <label for="newsletter-email" class="sr-only">
+          Seu e-mail
+        </label>
+        <input
+          id="newsletter-email"
+          type="email"
+          name="email"
+          required
+          autocomplete="email"
+          placeholder="voce@empresa.com.br"
+          class="border-border bg-bg text-fg placeholder:text-fg-muted focus:border-accent min-w-64 flex-1 rounded-md border px-4 py-2.5 outline-none"
+        />
+        <button
+          type="submit"
+          class="bg-accent text-bg rounded-md px-5 py-2.5 font-medium transition-opacity hover:opacity-90"
+        >
+          Assinar
+        </button>
+      </form>
+    ) : (
+      <p class="text-fg-muted border-border mt-6 inline-block rounded-md border border-dashed px-4 py-2.5 font-mono text-sm">
+        Assinatura em breve.
+      </p>
+    )
+  }
+</section>

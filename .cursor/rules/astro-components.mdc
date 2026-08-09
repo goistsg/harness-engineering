@@ -1,0 +1,47 @@
+---
+description: Convenções de componentes, layouts e páginas Astro deste projeto
+globs: src/components/**,src/layouts/**,src/pages/**,src/styles/**
+alwaysApply: false
+---
+
+# Componentes e páginas Astro
+
+## Estilos
+
+Tailwind v4 é CSS-first: **não existe `tailwind.config.js`**. Os tokens vivem no bloco
+`@theme` de `src/styles/global.css` e viram utilitários automaticamente.
+
+| Token | Valor | Utilitário |
+| --- | --- | --- |
+| `--color-bg` | `#18181B` | `bg-bg` |
+| `--color-surface` | `#27272A` | `bg-surface` |
+| `--color-accent` | `#E05638` | `text-accent` |
+| `--color-fg` | `#F4F4F5` | `text-fg` |
+| `--color-fg-muted` | `#A1A1AA` | `text-fg-muted` |
+| `--color-border` | `#3F3F46` | `border-border` |
+
+Nunca escreva hex literal em componente. Se falta um token, adicione ao `@theme` e
+documente em `spec/product-spec.md` — os dois andam juntos.
+
+Acessibilidade: `--color-accent` sobre `--color-bg` fica em torno de 4.6:1. Serve para
+links, títulos e CTAs; **não** use para corpo de texto longo nem para texto abaixo de
+16px. Corpo de texto usa `text-fg`; texto de apoio usa `text-fg-muted`.
+
+## Componentes
+
+- Astro puro por padrão. JavaScript no cliente só quando há interação real, sempre com
+  `client:visible` ou `client:idle` — nunca `client:load` sem justificativa.
+- Props tipadas via `interface Props` no frontmatter do componente.
+- Um componente por arquivo, em `PascalCase.astro`.
+
+## Páginas
+
+- Toda página passa por `BaseLayout.astro`, que injeta `<head>`, Open Graph e o canonical.
+- Artigo usa `ArticleLayout.astro`, que adiciona o JSON-LD `TechArticle`.
+- `title` e `description` são obrigatórios em toda página — sem eles o `<head>` fica
+  incompleto e o Lighthouse cai.
+
+## Dados
+
+Nada de fetch em tempo de execução: o site é estático. Dado de terceiro entra no build
+(ver `scripts/harness-report.mjs`) e é importado como JSON.

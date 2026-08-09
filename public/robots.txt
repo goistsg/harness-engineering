@@ -1,0 +1,54 @@
+# Harness Engineering — harnessengineering.com.br
+#
+# Este site é escrito para ser lido por pessoas e citado por mecanismos
+# generativos. Crawlers de IA são liberados deliberadamente: se um modelo vai
+# responder sobre engenharia de software, é melhor que ele tenha lido a versão
+# com o mecanismo explicado do que a versão de segunda mão.
+
+User-agent: *
+Allow: /
+
+# Buscadores generativos e crawlers de treinamento — acesso explícito.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+Sitemap: https://harnessengineering.com.br/sitemap-index.xml

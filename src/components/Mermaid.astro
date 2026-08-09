@@ -1,0 +1,80 @@
+---
+interface Props {
+  chart: string;
+  caption?: string | undefined;
+}
+
+const { chart, caption } = Astro.props;
+---
+
+<figure class="my-8">
+  <div
+    class="mermaid-diagram border-border bg-surface overflow-x-auto rounded-lg border p-5"
+    data-mermaid
+  >
+    {/* Fonte do diagrama: é o que aparece sem JavaScript e o que o script substitui. */}
+    <pre class="text-fg-muted m-0 border-0 bg-transparent p-0 font-mono text-sm">{chart}</pre>
+  </div>
+  {caption && <figcaption class="text-fg-muted mt-3 text-center text-base">{caption}</figcaption>}
+</figure>
+
+<script>
+  // Mermaid só é baixado quando um diagrama entra na viewport. Páginas sem
+  // diagrama não pagam por ele; páginas com diagrama não bloqueiam o first paint.
+  import type { Mermaid } from 'mermaid';
+
+  const containers = document.querySelectorAll<HTMLElement>('[data-mermaid]');
+
+  if (containers.length > 0) {
+    let loader: Promise<Mermaid> | null = null;
+
+    const loadMermaid = async () => {
+      if (!loader) {
+        loader = import('mermaid').then(({ default: mermaid }) => {
+          mermaid.initialize({
+            startOnLoad: false,
+            securityLevel: 'strict',
+            theme: 'dark',
+            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            themeVariables: {
+              background: '#27272A',
+              primaryColor: '#27272A',
+              primaryTextColor: '#F4F4F5',
+              primaryBorderColor: '#E05638',
+              lineColor: '#A1A1AA',
+              secondaryColor: '#3F3F46',
+              tertiaryColor: '#18181B',
+            },
+          });
+          return mermaid;
+        });
+      }
+      return loader;
+    };
+
+    const render = async (container: HTMLElement, index: number) => {
+      const source = container.querySelector('pre')?.textContent?.trim();
+      if (!source) return;
+
+      try {
+        const mermaid = await loadMermaid();
+        const { svg } = await mermaid.render(`mermaid-${index}`, source);
+        container.innerHTML = svg;
+      } catch {
+        // Diagrama inválido mantém o código-fonte visível, que ainda comunica.
+        container.dataset['mermaidError'] = 'true';
+      }
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const container = entry.target as HTMLElement;
+        observer.unobserve(container);
+        void render(container, Array.from(containers).indexOf(container));
+      }
+    });
+
+    containers.forEach((container) => observer.observe(container));
+  }
+</script>

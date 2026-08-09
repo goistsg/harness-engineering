@@ -1,0 +1,27 @@
+# Build output
+dist/
+.astro/
+.vercel/
+
+# Dependencies
+node_modules/
+
+# Environment — nunca versionar segredos
+.env
+.env.*
+!.env.example
+
+# Logs e caches
+*.log
+npm-debug.log*
+.eslintcache
+.lighthouseci/
+
+# Relatório em Markdown gerado sob demanda pelo CI
+quality-report.md
+
+# Sistema operacional / editor
+.DS_Store
+Thumbs.db
+.idea/
+*.swp

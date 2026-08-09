@@ -1,0 +1,201 @@
+---
+import { snapshot as score, history, sparklinePoints } from '@/lib/quality';
+
+const LEVEL_COUNT = 5;
+
+const dimensionsByFailure = [...score.dimensions].sort((a, b) => a.percent - b.percent);
+const failing = score.checks.filter((check) => !check.passed);
+const passing = score.checks.filter((check) => check.passed);
+
+const scannedAt = new Intl.DateTimeFormat('pt-BR', {
+  dateStyle: 'long',
+  timeStyle: 'short',
+  timeZone: 'America/Sao_Paulo',
+}).format(new Date(score.scannedAt));
+
+const points = sparklinePoints(history);
+const firstEntry = history[0];
+const lastEntry = history.at(-1);
+---
+
+<div class="space-y-14">
+  {
+    score.source === 'baseline' && (
+      <p class="border-accent bg-surface rounded border border-l-4 px-5 py-4 font-mono text-sm">
+        A varredura do build atual falhou. Os números abaixo vêm do último baseline commitado e
+        podem estar desatualizados.
+      </p>
+    )
+  }
+
+  <section aria-labelledby="nivel-atual">
+    <h2 id="nivel-atual" class="sr-only">Nível atual</h2>
+
+    <div class="border-border bg-surface rounded-lg border p-8">
+      <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+        <p class="text-accent font-mono text-5xl font-bold">L{score.level.index}</p>
+        <p class="text-2xl font-bold tracking-tight">{score.level.name}</p>
+        <p class="text-fg-muted ml-auto font-mono text-sm">
+          {score.score.earned}/{score.score.max} pontos · {score.score.percent}%
+        </p>
+      </div>
+
+      <ol class="mt-6 flex gap-1.5" aria-label="Escada de maturidade, L0 a L4">
+        {
+          Array.from({ length: LEVEL_COUNT }, (_, index) => (
+            <li
+              class:list={[
+                'h-2 flex-1 rounded-full',
+                index <= score.level.index ? 'bg-accent' : 'bg-border',
+              ]}
+              aria-current={index === score.level.index ? 'step' : undefined}
+            >
+              <span class="sr-only">
+                L{index} {index <= score.level.index ? 'atingido' : 'não atingido'}
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+
+      {
+        score.level.nextLevelGaps.length > 0 && (
+          <p class="text-fg-muted mt-5 font-mono text-sm">
+            Para o próximo nível: {score.level.nextLevelGaps.join(' · ')}
+          </p>
+        )
+      }
+
+      <p class="text-fg-muted mt-5 text-base">
+        Resultado apurado em {scannedAt}, por {score.tool.name} v{score.tool.version}.
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="dimensoes">
+    <h2 id="dimensoes" class="text-2xl font-bold tracking-tight">Dimensões avaliadas</h2>
+    <p class="text-fg-muted mt-2 max-w-2xl">
+      Seis dimensões, 108 pontos. A ordem abaixo é da mais fraca para a mais forte.
+    </p>
+
+    <ul class="mt-8 space-y-5">
+      {
+        dimensionsByFailure.map((dimension) => (
+          <li>
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <span class="font-medium">{dimension.title}</span>
+              <span class="text-fg-muted font-mono text-sm">
+                {dimension.earned}/{dimension.max} · {dimension.percent}%
+              </span>
+            </div>
+            <div
+              class="bg-border mt-2 h-2 overflow-hidden rounded-full"
+              role="img"
+              aria-label={`${dimension.title}: ${dimension.percent} por cento`}
+            >
+              <div
+                class:list={[
+                  'h-full rounded-full',
+                  dimension.percent === 100 ? 'bg-emerald-400' : 'bg-accent',
+                ]}
+                style={`width: ${dimension.percent}%`}
+              />
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {
+    history.length > 1 && firstEntry && lastEntry && (
+      <section aria-labelledby="historico">
+        <h2 id="historico" class="text-2xl font-bold tracking-tight">
+          Histórico
+        </h2>
+        <p class="text-fg-muted mt-2 max-w-2xl">
+          Cada ponto é uma mudança de nível ou de pontuação registrada na branch principal.
+        </p>
+
+        <div class="border-border bg-surface mt-6 rounded-lg border p-6">
+          <svg
+            viewBox="0 0 100 30"
+            preserveAspectRatio="none"
+            class="h-24 w-full"
+            role="img"
+            aria-label={`Evolução do score: de ${firstEntry.percent}% a ${lastEntry.percent}%`}
+          >
+            <polyline
+              points={points}
+              fill="none"
+              stroke="#E05638"
+              stroke-width="1"
+              vector-effect="non-scaling-stroke"
+            />
+          </svg>
+          <div class="text-fg-muted mt-4 flex justify-between font-mono text-sm">
+            <span>
+              {firstEntry.date} · L{firstEntry.level} · {firstEntry.percent}%
+            </span>
+            <span>
+              {lastEntry.date} · L{lastEntry.level} · {lastEntry.percent}%
+            </span>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section aria-labelledby="verificacoes">
+    <h2 id="verificacoes" class="text-2xl font-bold tracking-tight">
+      As {score.checks.length} verificações
+    </h2>
+    <p class="text-fg-muted mt-2 max-w-2xl">
+      {passing.length} passando, {failing.length} reprovando. As reprovadas vêm primeiro, com a remediação
+      exatamente como a ferramenta a descreve.
+    </p>
+
+    <div class="mt-8 overflow-x-auto">
+      <table class="w-full border-collapse text-base">
+        <thead>
+          <tr class="border-border border-b text-left">
+            <th scope="col" class="text-fg-muted py-2 pr-4 font-mono text-sm font-normal">Check</th>
+            <th scope="col" class="text-fg-muted py-2 pr-4 font-mono text-sm font-normal">Status</th
+            >
+            <th scope="col" class="text-fg-muted py-2 pr-4 font-mono text-sm font-normal">Pontos</th
+            >
+            <th scope="col" class="text-fg-muted py-2 font-mono text-sm font-normal">Detalhe</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            [...failing, ...passing].map((check) => (
+              <tr class="border-border border-b align-top">
+                <td class="py-3 pr-4 font-mono text-sm whitespace-nowrap">{check.id}</td>
+                <td class="py-3 pr-4">
+                  <span
+                    class:list={[
+                      'font-mono text-sm',
+                      check.passed ? 'text-emerald-400' : 'text-accent',
+                    ]}
+                  >
+                    {check.passed ? 'passa' : 'falha'}
+                  </span>
+                </td>
+                <td class="text-fg-muted py-3 pr-4 font-mono text-sm whitespace-nowrap">
+                  {check.earned}/{check.points}
+                </td>
+                <td class="py-3">
+                  <p class="font-medium">{check.title}</p>
+                  <p class="text-fg-muted mt-1 text-base">
+                    {check.passed ? check.evidence : check.remediation}
+                  </p>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

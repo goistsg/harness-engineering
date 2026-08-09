@@ -1,0 +1,69 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import JournalFeed from '@/components/JournalFeed.astro';
+import EmailCapture from '@/components/EmailCapture.astro';
+import { getPublishedArticles, articleUrl, formatDate } from '@/lib/journal';
+import { SITE } from '@/config/site';
+import { snapshot as score } from '@/lib/quality';
+
+const articles = await getPublishedArticles();
+const manifesto = articles.find((article) => article.id.startsWith('00-'));
+---
+
+<BaseLayout title={SITE.title} description={SITE.description}>
+  <section class="mx-auto max-w-5xl px-6 pt-20 pb-16">
+    <h1 class="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-6xl">
+      Engenharia de software com o <span class="text-accent">mecanismo</span> à mostra.
+    </h1>
+
+    <p class="text-fg-muted mt-6 max-w-2xl text-xl">
+      Um journal técnico sobre times, arquitetura e IA em produção. Toda afirmação vem com o
+      mecanismo que a sustenta — e este repositório mede a própria maturidade em público.
+    </p>
+
+    <div class="mt-8 flex flex-wrap items-center gap-4">
+      <a
+        href="/journal"
+        class="bg-accent text-bg rounded-md px-5 py-2.5 font-medium transition-opacity hover:opacity-90"
+      >
+        Ler o journal
+      </a>
+      <a
+        href="/quality"
+        class="border-border text-fg-muted hover:text-fg hover:border-fg-muted rounded-md border px-5 py-2.5 font-mono text-sm transition-colors"
+      >
+        harness-score: {score.level.name} · {score.score.percent}%
+      </a>
+    </div>
+  </section>
+
+  {
+    manifesto && (
+      <section class="mx-auto max-w-5xl px-6 pb-20">
+        <a
+          href={articleUrl(manifesto)}
+          class="border-accent bg-surface group block rounded-lg border border-l-4 p-8 transition-colors"
+        >
+          {/* Sobre bg-surface o acento fica em 3.94:1 — abaixo de AA para texto
+              pequeno. Ver a tabela de contraste em spec/product-spec.md. */}
+          <p class="text-fg-muted font-mono text-sm tracking-widest uppercase">Manifesto</p>
+          <h2 class="group-hover:text-accent mt-3 text-2xl font-bold tracking-tight transition-colors sm:text-3xl">
+            {manifesto.data.title}
+          </h2>
+          <p class="text-fg-muted mt-3 max-w-2xl">{manifesto.data.description}</p>
+          <p class="text-fg-muted mt-4 font-mono text-sm">
+            {formatDate(manifesto.data.pubDate)} · ler →
+          </p>
+        </a>
+      </section>
+    )
+  }
+
+  <section class="mx-auto max-w-5xl px-6 pb-20">
+    <JournalFeed articles={articles} />
+  </section>
+
+  <section class="mx-auto max-w-5xl px-6 pb-8">
+    <EmailCapture />
+  </section>
+</BaseLayout>

@@ -1,0 +1,29 @@
+---
+import { articleUrl, formatDate, type Article } from '@/lib/journal';
+
+interface Props {
+  article: Article;
+}
+
+const { article } = Astro.props;
+const { title, description, pubDate, tags, draft } = article.data;
+---
+
+<article class="group border-border border-t py-6">
+  <a href={articleUrl(article)} class="block">
+    <div class="text-fg-muted flex flex-wrap items-center gap-3 font-mono text-sm">
+      <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+      {draft && <span class="text-accent">rascunho</span>}
+    </div>
+
+    <h3 class="group-hover:text-accent mt-2 text-xl font-bold tracking-tight transition-colors">
+      {title}
+    </h3>
+
+    <p class="text-fg-muted mt-2 max-w-2xl">{description}</p>
+
+    <ul class="text-fg-muted mt-3 flex flex-wrap gap-2 font-mono text-sm">
+      {tags.map((tag) => <li class="border-border rounded border px-2 py-0.5">{tag}</li>)}
+    </ul>
+  </a>
+</article>

@@ -1,0 +1,64 @@
+---
+description: Regras editoriais e de GEO/SEO ao criar ou editar artigos MDX do journal
+globs: src/content/**/*.mdx
+alwaysApply: false
+---
+
+# Autoria de artigos
+
+A referência completa é [spec/content-guidelines.md](../../spec/content-guidelines.md).
+O essencial:
+
+## Frontmatter obrigatório
+
+```yaml
+---
+title: Título em português, sem o nome do site
+description: Uma frase entre 80 e 160 caracteres, usada em meta e em JSON-LD
+pubDate: 2026-01-15
+axis: ia-na-pratica # lideranca-squads | ia-na-pratica | arquitetura-seguranca
+tags: ['harness', 'avaliacao']
+draft: false
+---
+```
+
+`axis` é validado contra `EDITORIAL_AXES` em `src/config/site.ts`. Valor fora da lista
+quebra o build — por desenho.
+
+## Regras verificadas por teste
+
+`src/test/content-rules.test.ts` reprova o build quando:
+
+- não existe ao menos um `##` em forma de pergunta direta (terminando em `?`);
+- `description` está fora da faixa de 80–160 caracteres;
+- o nome do arquivo não segue `NN-slug-em-kebab-case.mdx`;
+- há `TODO`, `FIXME` ou `Lorem ipsum` no corpo;
+- um bloco de código não declara linguagem.
+
+Não contorne essas regras editando o teste. Elas existem porque o site é otimizado
+para ser citado por mecanismos generativos, e a seção em pergunta é o que torna o
+trecho extraível.
+
+## Estilo
+
+- Português do Brasil, segunda pessoa velada, sem "nós" corporativo.
+- Frases curtas. Preferir voz ativa.
+- Afirmação técnica precisa vir com o mecanismo que a sustenta, não com adjetivo.
+- Sem emoji no corpo do artigo.
+- Blocos de código sempre com linguagem: ` ```ts `, ` ```bash `.
+
+## Componentes disponíveis no MDX
+
+```mdx
+import Callout from '@/components/Callout.astro';
+import Mermaid from '@/components/Mermaid.astro';
+
+<Callout type="warning">Texto do aviso.</Callout>
+
+<Mermaid
+  chart={`graph TD; A[Requisição] --> B[Gate]; B --> C[Modelo];`}
+  caption="Fluxo de gate antes da chamada ao modelo"
+/>
+```
+
+`type` do Callout: `note`, `warning`, `danger` ou `insight`.

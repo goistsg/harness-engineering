@@ -1,0 +1,131 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import TechArticleSchema from '@/components/TechArticleSchema.astro';
+import { formatDate, type Article } from '@/lib/journal';
+import { getAxis } from '@/config/site';
+
+interface Props {
+  article: Article;
+  headings: { depth: number; slug: string; text: string }[];
+}
+
+const { article, headings } = Astro.props;
+const { title, description, pubDate, updatedDate, axis, tags, canonical } = article.data;
+
+const editorialAxis = getAxis(axis);
+const url = new URL(Astro.url.pathname, Astro.site).href;
+const tocHeadings = headings.filter((heading) => heading.depth === 2);
+---
+
+<BaseLayout title={title} description={description} canonical={canonical} ogType="article">
+  <TechArticleSchema
+    slot="head"
+    headline={title}
+    description={description}
+    datePublished={pubDate}
+    dateModified={updatedDate}
+    url={canonical ?? url}
+    keywords={tags}
+    section={editorialAxis.label}
+  />
+
+  <article class="mx-auto max-w-5xl px-6 py-16">
+    <header class="max-w-3xl">
+      <a
+        href="/journal"
+        class="text-accent font-mono text-sm tracking-widest uppercase hover:underline"
+      >
+        {editorialAxis.label}
+      </a>
+
+      <h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{title}</h1>
+
+      <p class="text-fg-muted mt-5 text-xl">{description}</p>
+
+      <div class="text-fg-muted mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-sm">
+        <time datetime={pubDate.toISOString()}>Publicado em {formatDate(pubDate)}</time>
+        {
+          updatedDate && (
+            <time datetime={updatedDate.toISOString()}>
+              · Atualizado em {formatDate(updatedDate)}
+            </time>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="mt-12 gap-12 lg:flex lg:items-start">
+      {
+        tocHeadings.length > 1 && (
+          <nav
+            aria-label="Índice do artigo"
+            class="border-border mb-10 border-l pl-5 lg:sticky lg:top-12 lg:order-2 lg:mb-0 lg:w-64 lg:shrink-0"
+          >
+            <p class="text-fg-muted mb-3 font-mono text-sm tracking-widest uppercase">
+              Nesta página
+            </p>
+            <ul class="space-y-2 text-base">
+              {tocHeadings.map((heading) => (
+                <li>
+                  <a
+                    href={`#${heading.slug}`}
+                    class="text-fg-muted hover:text-accent transition-colors"
+                  >
+                    {heading.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+
+      <div class="prose-journal lg:order-1 lg:flex-1">
+        <slot />
+      </div>
+    </div>
+
+    <footer class="border-border mt-16 border-t pt-8">
+      <ul class="text-fg-muted flex flex-wrap gap-2 font-mono text-sm">
+        {tags.map((tag) => <li class="border-border rounded border px-2 py-0.5">{tag}</li>)}
+      </ul>
+      <p class="text-fg-muted mt-6">
+        <a href="/journal" class="text-accent hover:underline">← Todos os artigos</a>
+      </p>
+    </footer>
+  </article>
+</BaseLayout>
+
+<script>
+  // Botão de copiar em cada bloco de código. Injetado no cliente porque o HTML
+  // do Shiki é gerado no build e não passa por um componente Astro.
+  for (const pre of document.querySelectorAll<HTMLPreElement>('.prose-journal pre.astro-code')) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'relative group/code';
+    pre.parentNode?.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = 'copiar';
+    button.setAttribute('aria-label', 'Copiar código para a área de transferência');
+    button.className =
+      'absolute right-3 top-3 rounded border border-border bg-surface px-2 py-1 font-mono ' +
+      'text-xs text-fg-muted opacity-0 transition-opacity focus:opacity-100 ' +
+      'group-hover/code:opacity-100 hover:text-fg';
+
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pre.innerText);
+        button.textContent = 'copiado';
+      } catch {
+        button.textContent = 'falhou';
+      }
+      setTimeout(() => {
+        button.textContent = 'copiar';
+      }, 2000);
+    });
+
+    wrapper.appendChild(button);
+  }
+</script>
