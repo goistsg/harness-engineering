@@ -1,0 +1,73 @@
+name: Harness Score
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  harness-score:
+    name: Gate de maturidade
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: write # commit do badge e do histórico na main
+      pull-requests: write # comentário com o delta no PR
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      # O gate. `min-level` é o patamar já conquistado: regressão de maturidade
+      # reprova o build em vez de virar sugestão. Ver ADR 0001.
+      - name: Rodar harness-score
+        id: score
+        uses: paladini/harness-score@v1
+        with:
+          min-level: '4'
+          badge: public/harness-badge.svg
+          report: quality-report.md
+          comment: 'true'
+
+      # O delta por verificação responde "qual check regrediu", que é a
+      # pergunta útil quando o nível cai.
+      - name: Delta em relação ao baseline
+        if: always()
+        run: npx harness-score --diff quality/baseline.json || true
+
+      - name: Resumo no job
+        if: always()
+        run: cat quality-report.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Atualizar histórico e badge
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          node scripts/harness-report.mjs --update-history
+          npx harness-score --json > quality/baseline.json
+
+          if [[ -z "$(git status --porcelain data/harness-history.json public/harness-badge.svg quality/baseline.json)" ]]; then
+            echo "Nível e pontuação inalterados; nada a commitar."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/harness-history.json public/harness-badge.svg quality/baseline.json
+          git commit -m "chore(quality): atualiza snapshot do harness-score [skip ci]"
+          git push
