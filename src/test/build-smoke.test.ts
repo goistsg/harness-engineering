@@ -107,6 +107,17 @@ describe.skipIf(!distExists)('conteúdo publicável', () => {
 
   // O manifesto discute a palavra "TODO" como conceito; a regra vale para o
   // texto renderizado, então checamos os marcadores em formato de placeholder.
+  // Um <a> quebrado em várias linhas pelo Prettier perde o espaço que o
+  // separava da palavra anterior, e o texto sai grudado ("resultado
+  // doharness-score"). O erro é invisível no código-fonte e óbvio na página.
+  it.each(PAGES)('%s não tem link colado na palavra anterior', (page) => {
+    const glued = read(page).match(/[\p{L}\p{N}]<a\s/gu) ?? [];
+    expect(
+      glued.length,
+      `link sem espaço antes. Use {' '} antes do <a>. Ocorrências: ${glued.join(', ')}`
+    ).toBe(0);
+  });
+
   it.each(PAGES)('%s não contém placeholder não preenchido', (page) => {
     const html = read(page);
     expect(html).not.toMatch(/Lorem ipsum/i);

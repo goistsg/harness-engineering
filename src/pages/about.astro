@@ -59,7 +59,7 @@ import { SITE, AUTHOR, EDITORIAL_AXES } from '@/config/site';
     <section class="mt-14">
       <h2 class="text-2xl font-bold tracking-tight">Como este site funciona</h2>
       <p class="text-fg-muted mt-4">
-        Site estático em Astro, conteúdo em MDX, deploy na Vercel. O código é público em
+        Site estático em Astro, conteúdo em MDX, deploy na Vercel. O código é público em{' '}
         <a
           href={SITE.repository}
           rel="noopener"
@@ -71,7 +71,7 @@ import { SITE, AUTHOR, EDITORIAL_AXES } from '@/config/site';
         as decisões de arquitetura com as alternativas descartadas.
       </p>
       <p class="text-fg-muted mt-4">
-        A maturidade de engenharia do próprio repositório é medida a cada push e publicada em
+        A maturidade de engenharia do próprio repositório é medida a cada push e publicada em{' '}
         <a
           href="/quality"
           class="text-accent underline decoration-1 underline-offset-2 hover:decoration-2"
@@ -83,13 +83,13 @@ import { SITE, AUTHOR, EDITORIAL_AXES } from '@/config/site';
     <section class="mt-14">
       <h2 class="text-2xl font-bold tracking-tight">Contato</h2>
       <p class="text-fg-muted mt-4">
-        Correção, discordância técnica ou sugestão de pauta:
+        Correção, discordância técnica ou sugestão de pauta:{' '}
         <a
           href={`mailto:${SITE.securityContact}`}
           class="text-accent underline decoration-1 underline-offset-2 hover:decoration-2"
         >
           {SITE.securityContact}
-        </a>. Vulnerabilidade de segurança segue o processo descrito em
+        </a>. Vulnerabilidade de segurança segue o processo descrito em{' '}
         <a
           href={`${SITE.repository}/blob/main/SECURITY.md`}
           rel="noopener"

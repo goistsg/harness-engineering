@@ -53,6 +53,17 @@ e o projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 Com essas correções, o Lighthouse fecha em **100 em performance,
 acessibilidade, boas práticas e SEO** nas três páginas medidas, com CLS 0.
 
+Encontrados ao inspecionar as páginas renderizadas em um navegador real:
+
+- Links quebrados em várias linhas pelo Prettier saíam colados na palavra
+  anterior ("resultado do**harness-score**"), em 5 pontos de `/about` e
+  `/quality`. Corrigido com `{' '}` explícito e coberto por teste, para que o
+  erro não volte silenciosamente.
+- O tema `dark` do Mermaid ignora `themeVariables` para borda de nó e fundo de
+  rótulo de aresta, aplicando `#CCCCCC` e `#585858` — fora do design system.
+  Trocado para o tema `base`, que respeita os tokens; valores conferidos no
+  DOM renderizado.
+
 ## Sobre este arquivo
 
 Contribuições que alterem comportamento visível, decisões de arquitetura ou

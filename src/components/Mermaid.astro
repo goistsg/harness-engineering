@@ -34,16 +34,30 @@ const { chart, caption } = Astro.props;
           mermaid.initialize({
             startOnLoad: false,
             securityLevel: 'strict',
-            theme: 'dark',
+            // 'base' é o único tema que respeita themeVariables por inteiro; o
+            // tema 'dark' sobrescreve borda de nó e fundo de rótulo com a
+            // própria paleta (#CCCCCC e #585858), que destoa do design system.
+            theme: 'base',
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
             themeVariables: {
+              darkMode: true,
               background: '#27272A',
-              primaryColor: '#27272A',
+              mainBkg: '#18181B',
+              primaryColor: '#18181B',
               primaryTextColor: '#F4F4F5',
-              primaryBorderColor: '#E05638',
+              primaryBorderColor: '#3F3F46',
+              secondaryColor: '#27272A',
+              secondaryBorderColor: '#3F3F46',
+              tertiaryColor: '#27272A',
+              tertiaryBorderColor: '#3F3F46',
               lineColor: '#A1A1AA',
-              secondaryColor: '#3F3F46',
-              tertiaryColor: '#18181B',
+              textColor: '#F4F4F5',
+              nodeBorder: '#3F3F46',
+              nodeTextColor: '#F4F4F5',
+              edgeLabelBackground: '#27272A',
+              clusterBkg: '#27272A',
+              clusterBorder: '#3F3F46',
+              titleColor: '#F4F4F5',
             },
           });
           return mermaid;
