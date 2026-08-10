@@ -3,7 +3,7 @@
     "name": "harness-score",
     "version": "1.5.2"
   },
-  "root": "/home/runner/work/harness-engineering/harness-engineering",
+  "root": ".",
   "truncated": false,
   "scopes": {
     "maturity": [

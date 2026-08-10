@@ -124,7 +124,20 @@ Ver [ADR 0001](./decisions/0001-adopt-harness-score.md). Três pontos de contato
 2. **CI (`quality.yml`)** — gate com `min-level`, badge, comentário de delta no
    PR e, na `main`, commit do histórico em `data/harness-history.json`.
 3. **`quality/baseline.json`** — relatório completo commitado, usado pelo
-   `--diff` para dizer qual verificação regrediu.
+   `--diff` para dizer qual verificação regrediu. Gravado por
+   `node scripts/harness-report.mjs --write-baseline`, que normaliza o campo
+   `root` para `.`: o relatório bruto guarda o caminho absoluto do diretório
+   escaneado, e sem normalizar todo build na `main` gerava um commit cujo único
+   diff era esse caminho. Ruído que esconde a mudança real quando ela aparece.
+
+### Idiomas
+
+O site é monolíngue (pt-BR) hoje, mas a estratégia de URL já está fixada:
+português na raiz, idiomas futuros prefixados (`/en/about`). Ver
+[ADR 0003](./decisions/0003-url-strategy-for-i18n.md) — é a única decisão de
+i18n que não podia ser adiada, porque mudá-la depois invalida toda URL
+publicada. O bloco `i18n` em `astro.config.ts` é inerte hoje: as rotas geradas
+são idênticas com e sem ele.
 
 ### Vercel
 

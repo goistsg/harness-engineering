@@ -56,9 +56,13 @@ propaganda, e o objetivo dela é o oposto disso.
 ## Depois de corrigir
 
 ```bash
-npm run quality                                   # confirme o nível
-npx harness-score --json > quality/baseline.json  # atualize o baseline se subiu
+npm run quality                                        # confirme o nível
+node scripts/harness-report.mjs --write-baseline       # atualize o baseline
 ```
+
+Use o script, não `npx harness-score --json > quality/baseline.json`: ele
+normaliza o campo `root`, que guarda o caminho absoluto de onde a varredura
+rodou e mudaria o arquivo a cada máquina.
 
 Se o nível **subiu**, eleve também o `min-level` em `.github/workflows/quality.yml`:
 o patamar conquistado vira o novo piso.

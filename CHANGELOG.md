@@ -36,6 +36,15 @@ e o projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   Lighthouse CI.
 - Artigo 00 — Manifesto, validando o pipeline MDX ponta a ponta.
 
+### Decidido
+
+- Estratégia de URL por idioma fixada antes do primeiro deploy: português na
+  raiz, idiomas futuros prefixados (`/en/about`). Declarada em `astro.config.ts`
+  e registrada no [ADR 0003](./spec/decisions/0003-url-strategy-for-i18n.md).
+  A configuração é inerte hoje — as rotas geradas são idênticas — mas é a única
+  decisão de i18n que não podia ser adiada, porque mudá-la depois invalida toda
+  URL publicada, indexada e citada.
+
 ### Corrigido
 
 - Contraste do acento `#E05638` sobre `--color-surface` medido em 3.94:1, abaixo
@@ -63,6 +72,11 @@ Encontrados ao inspecionar as páginas renderizadas em um navegador real:
   rótulo de aresta, aplicando `#CCCCCC` e `#585858` — fora do design system.
   Trocado para o tema `base`, que respeita os tokens; valores conferidos no
   DOM renderizado.
+- `quality/baseline.json` guardava o caminho absoluto do diretório escaneado,
+  o que fazia todo build na `main` produzir um commit cujo único diff era esse
+  caminho. O baseline passou a ser gravado por
+  `scripts/harness-report.mjs --write-baseline`, que normaliza o campo — agora
+  o arquivo é idêntico independente de onde a varredura roda.
 
 ## Sobre este arquivo
 

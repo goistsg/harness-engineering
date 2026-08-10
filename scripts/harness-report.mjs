@@ -20,6 +20,19 @@ const BASELINE_PATH = join(ROOT, 'quality', 'baseline.json');
 const OUTPUT_PATH = join(ROOT, 'src', 'data', 'harness-score.json');
 const HISTORY_PATH = join(ROOT, 'data', 'harness-history.json');
 
+/**
+ * Baseline determinístico, independente de onde a varredura rodou.
+ *
+ * O relatório traz `root` com o caminho absoluto do diretório escaneado, que é
+ * `/home/runner/work/...` no CI e outra coisa em cada máquina. Sem normalizar,
+ * todo build na branch principal produzia um commit cujo único diff era esse
+ * caminho — ruído que, pior que poluir o histórico, esconde a mudança real
+ * quando ela acontece.
+ */
+function toBaseline(report) {
+  return { ...report, root: '.' };
+}
+
 /** Projeção estável do relatório: só o que a página /quality realmente usa. */
 function toSnapshot(report, source) {
   return {
@@ -122,10 +135,13 @@ function writeSnapshotIfChanged(snapshot) {
 
 function main() {
   const shouldWriteHistory = process.argv.includes('--update-history');
+  const shouldWriteBaseline = process.argv.includes('--write-baseline');
   let snapshot;
+  let report;
 
   try {
-    snapshot = toSnapshot(scan(), 'scan');
+    report = scan();
+    snapshot = toSnapshot(report, 'scan');
     console.log(
       `[quality] ${snapshot.level.name} (L${snapshot.level.index}) — ` +
         `${snapshot.score.earned}/${snapshot.score.max} pontos (${snapshot.score.percent}%)`
@@ -143,6 +159,11 @@ function main() {
   }
 
   writeSnapshotIfChanged(snapshot);
+
+  if (shouldWriteBaseline && report) {
+    writeJson(BASELINE_PATH, toBaseline(report));
+    console.log('[quality] baseline atualizado.');
+  }
 
   if (shouldWriteHistory && snapshot.source === 'scan') {
     const { history, changed } = updateHistory(snapshot);

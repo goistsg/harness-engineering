@@ -58,8 +58,9 @@ jobs:
       - name: Atualizar histórico e badge
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          node scripts/harness-report.mjs --update-history
-          npx harness-score --json > quality/baseline.json
+          # O script normaliza o `root` do relatório antes de gravar o baseline;
+          # sem isso, o caminho absoluto do runner geraria um commit a cada build.
+          node scripts/harness-report.mjs --update-history --write-baseline
 
           if [[ -z "$(git status --porcelain data/harness-history.json public/harness-badge.svg quality/baseline.json)" ]]; then
             echo "Nível e pontuação inalterados; nada a commitar."
