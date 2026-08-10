@@ -12,7 +12,7 @@
   "license": "MIT",
   "author": "Tiago Gois",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "dev": "astro dev",

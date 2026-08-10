@@ -54,7 +54,7 @@ Detalhes e trade-offs em [`spec/architecture.md`](./spec/architecture.md).
 
 ## Rodando localmente
 
-Requer **Node.js 22.12+**.
+Requer **Node.js 24+** (a versão exata está em `.nvmrc`).
 
 ```bash
 git clone https://github.com/goistsg/harness-engineering.git

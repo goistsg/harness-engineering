@@ -42,8 +42,15 @@ inteiras de falha e de superfície de ataque de um site cuja função é publica
 | Maturidade do harness | `harness-score`                                  | 1.5.x              |
 | Hospedagem            | Vercel (integração Git)                          | —                  |
 
-Node 22.12 ou superior é obrigatório — é o piso do Astro 7, e está fixado em
-`engines` no `package.json` e no `node-version` dos workflows.
+**Node 24 ou superior.** O piso do Astro 7 é 22.12; o deste projeto é mais alto
+de propósito: o Node 22 entrou em manutenção em outubro de 2025 e sai de suporte
+em abril de 2027, enquanto o 24 é o LTS ativo, com suporte até abril de 2028 — e
+é o default da Vercel para projetos novos desde janeiro de 2026, o que torna
+ficar no 22 uma escolha ativa contra a corrente.
+
+A versão vive em **`.nvmrc`**, fonte única lida pelos gerenciadores de versão e
+pelos três workflows (`node-version-file`). O `engines` do `package.json`
+declara o mesmo piso. Bump é uma linha, e não três.
 
 ## 3. Trade-offs assumidos
 

@@ -36,6 +36,16 @@ e o projeto segue [Versionamento Semântico](https://semver.org/lang/pt-BR/).
   Lighthouse CI.
 - Artigo 00 — Manifesto, validando o pipeline MDX ponta a ponta.
 
+### Alterado
+
+- Piso de Node elevado de 22.12 para **24**. O Node 22 entrou em manutenção em
+  outubro de 2025 e sai de suporte em abril de 2027; o 24 é o LTS ativo, com
+  suporte até abril de 2028, e é o default da Vercel para projetos novos desde
+  janeiro de 2026. A versão passou a viver em `.nvmrc`, fonte única lida pelos
+  gerenciadores de versão e pelos três workflows via `node-version-file` — antes
+  ela estava repetida em três lugares. Pipeline completo verificado sob Node
+  24.19.0 antes da mudança.
+
 ### Decidido
 
 - Estratégia de URL por idioma fixada antes do primeiro deploy: português na

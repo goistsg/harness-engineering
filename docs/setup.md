@@ -2,18 +2,26 @@
 
 ## Pré-requisitos
 
-| Ferramenta | Versão                  | Por quê                               |
-| ---------- | ----------------------- | ------------------------------------- |
-| Node.js    | **22.12 ou superior**   | Piso do Astro 7 (fixado em `engines`) |
-| npm        | 10 ou superior          | O lockfile é `package-lock.json`      |
-| Git        | qualquer versão recente | O hook de pre-commit depende dele     |
+| Ferramenta | Versão                  | Por quê                                         |
+| ---------- | ----------------------- | ----------------------------------------------- |
+| Node.js    | **24 ou superior**      | Versão em `.nvmrc`, também exigida em `engines` |
+| npm        | 10 ou superior          | O lockfile é `package-lock.json`                |
+| Git        | qualquer versão recente | O hook de pre-commit depende dele               |
 
-Confira antes de começar:
+A versão do Node vive em `.nvmrc` — uma só fonte, lida pelos gerenciadores de
+versão e pelos três workflows de CI (`node-version-file`). Bump de versão é uma
+linha.
 
 ```bash
-node -v   # precisa ser >= v22.12
+nvm use     # ou: fnm use — ambos leem o .nvmrc
+node -v     # precisa ser >= v24
 npm -v
 ```
+
+O Astro 7 exige no mínimo Node 22.12; o piso deste projeto é mais alto de
+propósito. Node 22 entrou em manutenção em outubro de 2025 e sai de suporte em
+abril de 2027, enquanto o 24 é o LTS ativo e vai até abril de 2028 — e é o
+default da Vercel para projetos novos desde janeiro de 2026.
 
 ## Instalação
 

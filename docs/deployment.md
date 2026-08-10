@@ -38,7 +38,7 @@ Se o projeto ainda não está conectado, este é o passo a passo completo.
    | Build Command    | `npm run build` |
    | Output Directory | `dist`          |
    | Install Command  | `npm ci`        |
-   | Node.js Version  | **22.x**        |
+   | Node.js Version  | **24.x**        |
 
 O `npm run build` dispara o `prebuild`, que roda o `harness-score` sobre o
 repositório clonado — é assim que a página `/quality` publica o resultado da
@@ -132,7 +132,9 @@ pipeline.
 
 1. **`npm ci` falhou** — `package-lock.json` fora de sincronia com o
    `package.json`. Rode `npm install` localmente e commite o lockfile.
-2. **Versão de Node** — confirme 22.x em Settings → General.
+2. **Versão de Node** — confirme 24.x em Settings → General. É o default
+   da Vercel para projetos novos desde janeiro de 2026, então normalmente já
+   vem certo; o `engines` do `package.json` exige `>=24`.
 3. **`astro check` reprovou** — o `prebuild` e o build não rodam typecheck; se o
    erro é de tipo, ele aparece no CI, não na Vercel. Rode `npm run typecheck`.
 4. **`[quality] varredura falhou`** — apenas aviso. O build segue com o
