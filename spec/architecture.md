@@ -110,6 +110,24 @@ o caminho final com hash gerado pelo próprio build. Sem esse preload, o texto
 renderiza na fonte de fallback e reflui quando a Inter chega — media 0.045 de
 CLS na página de artigo antes da correção, zero depois.
 
+### Ícones derivados no build, OG image commitada
+
+Todo tamanho de ícone (`apple-touch-icon` de 180px, os 192 e 512 do manifesto)
+sai de `src/assets/logo.png` pelo `getImage()` do Astro, em vez de virar binário
+commitado. Um arquivo de origem, nenhuma cópia derivada para envelhecer fora de
+sincronia quando a marca mudar.
+
+A OG image (`public/og.png`) segue o caminho oposto: é um arquivo estático,
+gerado à mão a partir de `scripts/og-image.html`. Gerá-la no build exigiria
+satori ou `@vercel/og` — um renderizador inteiro de dependência para produzir
+**uma** imagem, que só muda quando a marca ou a tagline mudam. O template fica
+versionado ao lado do resultado, com o comando de regeração no comentário do
+próprio arquivo.
+
+**Custo aceito:** editar o template não regenera o PNG sozinho. A troca vale
+enquanto a imagem for uma só; quando cada artigo precisar da sua, com o próprio
+título, a dependência passa a se pagar.
+
 ### Sem `@tailwindcss/typography`
 
 A tipografia do artigo é escrita à mão em `@layer components` (`.prose-journal`).
@@ -145,6 +163,13 @@ português na raiz, idiomas futuros prefixados (`/en/about`). Ver
 i18n que não podia ser adiada, porque mudá-la depois invalida toda URL
 publicada. O bloco `i18n` em `astro.config.ts` é inerte hoje: as rotas geradas
 são idênticas com e sem ele.
+
+A Fase 1 acrescenta apenas a superfície visível: `LOCALES`, em
+`src/config/site.ts`, e o `<LanguageSwitcher />` no cabeçalho. Os idiomas
+marcados com `available: false` renderizam desabilitados — o seletor existe,
+mas não linka para rota que não existe. Quando a tradução entrar, a sequência é
+virar a flag, acrescentar o locale em `astro.config.ts` e gerar os `hreflang`
+recíprocos que o ADR 0003 registra como requisito.
 
 ### Vercel
 

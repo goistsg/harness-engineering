@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { SITE, AUTHOR, EDITORIAL_AXES, AXIS_IDS, getAxis } from '@/config/site';
+import {
+  SITE,
+  AUTHOR,
+  EDITORIAL_AXES,
+  AXIS_IDS,
+  getAxis,
+  LOCALES,
+  DEFAULT_LOCALE,
+} from '@/config/site';
 
 describe('configuração do site', () => {
   it('usa URL absoluta em https, sem barra final', () => {
@@ -68,5 +76,34 @@ describe('eixos editoriais', () => {
   it('lança erro em eixo desconhecido em vez de devolver undefined', () => {
     // @ts-expect-error — validando o comportamento em tempo de execução.
     expect(() => getAxis('eixo-inexistente')).toThrow();
+  });
+});
+
+describe('idiomas', () => {
+  it('tem o idioma padrão em primeiro, disponível e sem prefixo de rota', () => {
+    expect(DEFAULT_LOCALE).toBe(LOCALES[0]);
+    expect(DEFAULT_LOCALE.code).toBe(SITE.language);
+    expect(DEFAULT_LOCALE.available).toBe(true);
+    expect(DEFAULT_LOCALE.pathPrefix).toBe('');
+  });
+
+  // A assimetria é a decisão do ADR 0003: só o idioma padrão mora na raiz.
+  // Um segundo locale sem prefixo colidiria com as URLs já publicadas.
+  it('exige prefixo de rota em todo idioma que não seja o padrão', () => {
+    for (const locale of LOCALES.filter((candidate) => candidate.code !== SITE.language)) {
+      expect(locale.pathPrefix).toMatch(/^\/[a-z]{2}(?:-[A-Z]{2})?$/);
+    }
+  });
+
+  it('usa códigos e rótulos únicos', () => {
+    expect(new Set(LOCALES.map((locale) => locale.code)).size).toBe(LOCALES.length);
+    expect(new Set(LOCALES.map((locale) => locale.short)).size).toBe(LOCALES.length);
+  });
+
+  it('rotula cada idioma com duas letras maiúsculas e um nome preenchido', () => {
+    for (const locale of LOCALES) {
+      expect(locale.short).toMatch(/^[A-Z]{2}$/);
+      expect(locale.label.trim().length).toBeGreaterThan(0);
+    }
   });
 });

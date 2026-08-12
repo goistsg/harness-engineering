@@ -10,8 +10,18 @@ const articles = await getPublishedArticles();
 const manifesto = articles.find((article) => article.id.startsWith('00-'));
 ---
 
+{
+  /*
+  Ritmo vertical da home, em três degraus (ver spec/product-spec.md §4):
+  4rem (`py-16`) entre blocos de natureza diferente — hero, manifesto, feed,
+  captura de e-mail; 3rem (`space-y-12`) entre grupos do mesmo tipo, dentro do
+  feed; 1.5rem (`py-6`) dentro de um grupo, entre cards. Antes da passada de
+  refinamento os espaços eram 5rem/4rem/1rem sem regra: cada bloco tinha o
+  próprio, e a página não tinha respiração legível.
+*/
+}
 <BaseLayout title={SITE.title} description={SITE.description}>
-  <section class="mx-auto max-w-5xl px-6 pt-20 pb-16">
+  <section class="mx-auto max-w-5xl px-6 py-16">
     <h1 class="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-6xl">
       Engenharia de software com o <span class="text-accent">mecanismo</span> à mostra.
     </h1>
@@ -39,17 +49,15 @@ const manifesto = articles.find((article) => article.id.startsWith('00-'));
 
   {
     manifesto && (
-      <section class="mx-auto max-w-5xl px-6 pb-20">
+      <section class="mx-auto max-w-5xl px-6 pb-16">
         <a
           href={articleUrl(manifesto)}
-          class="border-accent bg-surface group block rounded-lg border border-l-4 p-8 transition-colors"
+          class="border-accent bg-surface hover:bg-surface-hover block rounded-lg border border-l-4 p-8 no-underline transition-colors"
         >
           {/* Sobre bg-surface o acento fica em 3.94:1 — abaixo de AA para texto
               pequeno. Ver a tabela de contraste em spec/product-spec.md. */}
           <p class="text-fg-muted font-mono text-sm tracking-widest uppercase">Manifesto</p>
-          <h2 class="group-hover:text-accent mt-3 text-2xl font-bold tracking-tight transition-colors sm:text-3xl">
-            {manifesto.data.title}
-          </h2>
+          <h2 class="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">{manifesto.data.title}</h2>
           <p class="text-fg-muted mt-3 max-w-2xl">{manifesto.data.description}</p>
           <p class="text-fg-muted mt-4 font-mono text-sm">
             {formatDate(manifesto.data.pubDate)} · ler →
@@ -59,11 +67,18 @@ const manifesto = articles.find((article) => article.id.startsWith('00-'));
     )
   }
 
-  <section class="mx-auto max-w-5xl px-6 pb-20">
+  <section class="mx-auto max-w-5xl px-6 pb-6">
     <JournalFeed articles={articles} />
   </section>
 
-  <section class="mx-auto max-w-5xl px-6 pb-8">
+  {
+    /*
+    O feed fecha com 1.5rem, não 4rem: a captura de e-mail é a continuação
+    natural da leitura do feed, não um bloco novo. O degrau de 4rem volta
+    depois dela, antes do rodapé.
+  */
+  }
+  <section class="mx-auto max-w-5xl px-6 pb-16">
     <EmailCapture />
   </section>
 </BaseLayout>

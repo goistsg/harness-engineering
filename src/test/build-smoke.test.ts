@@ -127,6 +127,60 @@ describe.skipIf(!distExists)('conteúdo publicável', () => {
   });
 });
 
+describe.skipIf(!distExists)('marca e ícones', () => {
+  const PAGES = ['index.html', 'quality/index.html'];
+
+  it.each(PAGES)('%s declara favicon, apple-touch-icon e manifesto', (page) => {
+    const html = read(page);
+    expect(html).toContain('<link rel="icon" href="/favicon.svg"');
+    expect(html).toMatch(
+      /<link rel="apple-touch-icon" sizes="180x180" href="\/_astro\/[^"]+\.png"/
+    );
+    expect(html).toContain('<link rel="manifest" href="/site.webmanifest"');
+  });
+
+  it.each(PAGES)('%s aponta a OG image por URL absoluta e com dimensões', (page) => {
+    const html = read(page);
+    expect(html).toContain(
+      '<meta property="og:image" content="https://harnessengineering.com.br/og.png"'
+    );
+    expect(html).toContain('<meta property="og:image:width" content="1200"');
+    expect(html).toContain('<meta property="og:image:height" content="630"');
+  });
+
+  it('publica a OG image em 1200x630', () => {
+    const png = readFileSync(join(DIST, 'og.png'));
+    // Cabeçalho PNG: largura e altura são dois inteiros de 32 bits no IHDR.
+    expect(png.readUInt32BE(16)).toBe(1200);
+    expect(png.readUInt32BE(20)).toBe(630);
+  });
+
+  it('gera o manifesto com os ícones de 192 e 512', () => {
+    const manifest = JSON.parse(read('site.webmanifest')) as {
+      icons: { sizes: string }[];
+    };
+    const sizes = manifest.icons.map((icon) => icon.sizes);
+    expect(sizes).toContain('192x192');
+    expect(sizes).toContain('512x512');
+  });
+});
+
+describe.skipIf(!distExists)('seletor de idioma', () => {
+  const html = distExists ? read('index.html') : '';
+
+  it('mostra os três idiomas planejados', () => {
+    for (const label of ['PT', 'EN', 'ES']) {
+      expect(html).toContain(`>${label}<`);
+    }
+  });
+
+  // A regra que este teste protege: idioma sem tradução publicada aparece
+  // desabilitado, não como link. Um href="/en/" aqui é um 404 no ar.
+  it('não linka para idioma que ainda não tem rota', () => {
+    expect(html).not.toMatch(/href="\/(en|es)\//);
+  });
+});
+
 describe.skipIf(!distExists)('página /quality', () => {
   const html = distExists ? read('quality/index.html') : '';
 

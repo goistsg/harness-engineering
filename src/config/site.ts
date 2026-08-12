@@ -89,3 +89,35 @@ export const NAV_LINKS = [
   { href: '/about', label: 'Sobre' },
   { href: '/quality', label: 'Qualidade' },
 ] as const;
+
+export interface Locale {
+  /** Código BCP 47, igual ao que vai no atributo `lang`. */
+  readonly code: string;
+  /** Rótulo curto do seletor no header. Duas letras, caixa alta. */
+  readonly short: string;
+  /** Nome do idioma no próprio idioma — lido por quem não entende português. */
+  readonly label: string;
+  /** Prefixo de rota. Vazio no idioma padrão: pt-BR mora na raiz (ADR 0003). */
+  readonly pathPrefix: string;
+  /** `false` enquanto não existir tradução publicada — o item não vira link. */
+  readonly available: boolean;
+}
+
+/**
+ * Idiomas do seletor do header, na Fase 1 do i18n.
+ *
+ * Inglês e espanhol aparecem no seletor com `available: false`: o componente os
+ * mostra desabilitados, marcados como "em breve", em vez de linkar para rotas
+ * que ainda não existem. Publicar um link para `/en/` hoje seria publicar um
+ * 404 — ver a regra 3 do AGENTS.md. Quando a tradução entrar, o único ajuste é
+ * virar a flag aqui.
+ *
+ * A ordem dos prefixos segue o ADR 0003: o idioma padrão fica sem prefixo.
+ */
+export const LOCALES = [
+  { code: 'pt-BR', short: 'PT', label: 'Português', pathPrefix: '', available: true },
+  { code: 'en', short: 'EN', label: 'English', pathPrefix: '/en', available: false },
+  { code: 'es', short: 'ES', label: 'Español', pathPrefix: '/es', available: false },
+] as const satisfies readonly Locale[];
+
+export const DEFAULT_LOCALE: Locale = LOCALES[0];

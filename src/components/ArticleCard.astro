@@ -9,14 +9,25 @@ const { article } = Astro.props;
 const { title, description, pubDate, tags, draft } = article.data;
 ---
 
-<article class="group border-border border-t py-6">
-  <a href={articleUrl(article)} class="block">
+{
+  /*
+  Hover do card: clareia a borda e o fundo, e só. Sem transform, sem sombra e
+  sem trocar a cor do título — o texto de um card não pode mudar de cor quando
+  o cursor passa, senão a página inteira pisca durante a leitura. O recuo
+  negativo faz o preenchimento sangrar 1rem para os lados, para o realce ler
+  como um bloco e não como uma faixa colada no texto.
+*/
+}
+<article
+  class="border-border hover:border-border-strong hover:bg-surface-hover -mx-4 border-t px-4 py-6 transition-colors"
+>
+  <a href={articleUrl(article)} class="block no-underline">
     <div class="text-fg-muted flex flex-wrap items-center gap-3 font-mono text-sm">
       <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
       {draft && <span class="text-accent">rascunho</span>}
     </div>
 
-    <h3 class="group-hover:text-accent mt-2 text-xl font-bold tracking-tight transition-colors">
+    <h3 class="text-fg mt-2 text-xl font-bold tracking-tight">
       {title}
     </h3>
 

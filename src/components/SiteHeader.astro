@@ -1,0 +1,149 @@
+---
+/**
+ * Cabeçalho do site: marca, navegação principal e seletor de idioma.
+ *
+ * Abaixo de 640px a navegação colapsa num menu de hambúrguer; logo e seletor
+ * de idioma continuam visíveis, porque são justamente os dois controles que
+ * alguém que caiu na página por um link precisa enxergar sem abrir nada.
+ */
+import { Image } from 'astro:assets';
+import { SITE, NAV_LINKS } from '@/config/site';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import logo from '@/assets/logo.png';
+
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+function isCurrent(href: string): boolean {
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+}
+---
+
+<header class="border-border border-b">
+  <div class="mx-auto max-w-5xl px-6">
+    <div class="flex items-center gap-4 py-4">
+      <a
+        href="/"
+        class="text-fg flex items-center gap-2.5 text-base font-bold tracking-tight no-underline"
+        aria-label={`${SITE.name} — página inicial`}
+      >
+        {
+          /* `eager`: a marca está no topo de toda página. Adiada, ela aparece
+            depois do texto e o cabeçalho pisca no primeiro carregamento. */
+        }
+        <Image
+          src={logo}
+          alt=""
+          loading="eager"
+          densities={[2]}
+          width={30}
+          height={30}
+          class="h-[30px] w-[30px]"
+        />
+        <span>Harness<span class="hidden sm:inline"> Engineering</span></span>
+      </a>
+
+      <div class="ml-auto flex items-center gap-3 sm:gap-6">
+        <nav aria-label="Navegação principal" class="hidden sm:block">
+          <ul class="flex items-center gap-6 text-base">
+            {
+              NAV_LINKS.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    aria-current={isCurrent(link.href) ? 'page' : undefined}
+                    class:list={[
+                      'hover:text-fg no-underline transition-colors',
+                      isCurrent(link.href) ? 'text-accent' : 'text-fg-muted',
+                    ]}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+
+        {
+          /* Fora do <nav>, e fora do menu de hambúrguer: idioma não é destino de
+            navegação, e some da tela justamente em quem mais precisa dele. */
+        }
+        <LanguageSwitcher />
+
+        <button
+          type="button"
+          id="menu-toggle"
+          aria-expanded="false"
+          aria-controls="menu-mobile"
+          aria-label="Abrir navegação"
+          class="text-fg -me-2.5 flex h-10 w-10 items-center justify-center sm:hidden"
+        >
+          {
+            /* Alvo de toque de 40px em volta de um ícone de 16px: o traço fino
+              vem do desenho da marca, a área clicável não pode vir junto. */
+          }
+          <span class="flex w-4 flex-col gap-[3px]" aria-hidden="true" data-icon="closed">
+            <span class="bg-fg h-[2px] w-full"></span>
+            <span class="bg-fg h-[2px] w-full"></span>
+            <span class="bg-fg h-[2px] w-full"></span>
+          </span>
+          <span class="text-accent text-lg leading-none" aria-hidden="true" data-icon="open" hidden
+            >✕</span
+          >
+        </button>
+      </div>
+    </div>
+
+    <nav id="menu-mobile" aria-label="Navegação principal" hidden class="border-border border-t">
+      <ul class="flex flex-col gap-4 py-4 text-base">
+        {
+          NAV_LINKS.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                aria-current={isCurrent(link.href) ? 'page' : undefined}
+                class:list={[
+                  'no-underline',
+                  isCurrent(link.href) ? 'text-accent' : 'text-fg-muted',
+                ]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById('menu-toggle');
+  const menu = document.getElementById('menu-mobile');
+
+  if (toggle && menu) {
+    const iconClosed = toggle.querySelector<HTMLElement>('[data-icon="closed"]');
+    const iconOpen = toggle.querySelector<HTMLElement>('[data-icon="open"]');
+
+    function render(open: boolean): void {
+      if (!toggle || !menu) return;
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Fechar navegação' : 'Abrir navegação');
+      menu.hidden = !open;
+      if (iconClosed) iconClosed.hidden = open;
+      if (iconOpen) iconOpen.hidden = !open;
+    }
+
+    toggle.addEventListener('click', () => {
+      render(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+
+    // O menu só existe abaixo de 640px. Se a janela crescer com ele aberto, o
+    // estado precisa voltar ao inicial — senão a lista vertical reaparece
+    // embaixo da navegação horizontal.
+    const wide = window.matchMedia('(min-width: 640px)');
+    wide.addEventListener('change', (event) => {
+      if (event.matches) render(false);
+    });
+  }
+</script>
