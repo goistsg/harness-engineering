@@ -69,6 +69,13 @@ Todos os tokens vivem no bloco `@theme` de `src/styles/global.css`. Tailwind v4
 | Texto secundário         | `--color-fg-muted` | `#A1A1AA` | `text-fg-muted` |
 | Bordas                   | `--color-border`   | `#3F3F46` | `border-border` |
 
+Dois tons existem só para estado de hover, e não entram em texto:
+
+| Papel                   | Token                   | Valor     | Utilitário             |
+| ----------------------- | ----------------------- | --------- | ---------------------- |
+| Borda sob o cursor      | `--color-border-strong` | `#52525B` | `border-border-strong` |
+| Superfície sob o cursor | `--color-surface-hover` | `#2D2D31` | `bg-surface-hover`     |
+
 ### Contraste — restrição conhecida
 
 Razões WCAG 2.1 medidas (não estimadas):
@@ -89,7 +96,7 @@ A regra que decorre disso, e que vale como revisão de código:
 > grandes.
 
 Ocorrências que dependem dessa exceção hoje: o nível de maturidade (`L4`) na
-página `/quality`, renderizado em `text-5xl font-bold`.
+página `/quality`, renderizado em `text-7xl font-bold`.
 
 A meta de acessibilidade no Lighthouse é 100, e essa restrição é o que a mantém
 alcançável sem trocar a cor da marca. Para reproduzir os números, use qualquer
@@ -110,11 +117,120 @@ Realce de sintaxe: Shiki com o tema `one-dark-pro`, configurado em
 fundo `#282c34` do One Dark Pro fica mais próximo de `--color-surface` e evita
 que o bloco de código pareça um recorte de outro site.
 
+### Números medidos
+
+Todo valor quantitativo que o site publica — nível de maturidade, pontuação,
+percentuais por dimensão, pontos por verificação — sai em JetBrains Mono com
+`tabular-nums`, e não na fonte do corpo de texto. É a distinção entre o que o
+site afirma e o que o site mediu, feita na tipografia.
+
+| Papel                             | Especificação                     |
+| --------------------------------- | --------------------------------- |
+| Nível de maturidade (`L4`)        | mono, 4.5rem, peso 700, em acento |
+| Pontuação e percentual do topo    | mono, 1.5rem, `fg-muted`          |
+| Números de dimensão e verificação | mono, 0.875rem, `fg-muted`        |
+
+O nível é o maior elemento tipográfico do site fora do `H1`, e é a única
+ocorrência de acento sobre `surface` — legal porque é texto grande (ver a
+tabela de contraste acima).
+
+Barras de progresso por dimensão: 6px de altura, trilho em `--color-border`,
+preenchimento em `--color-accent` (verde quando a dimensão está em 100%). Sem
+animação de preenchimento — a barra já está no estado final quando a página
+carrega.
+
+### Ritmo de espaçamento
+
+Três degraus, e nada entre eles:
+
+| Degrau | Valor               | Onde                                                  |
+| ------ | ------------------- | ----------------------------------------------------- |
+| Seção  | 4rem (`py-16`)      | Entre blocos de natureza diferente, e antes do rodapé |
+| Grupo  | 3rem (`space-y-12`) | Entre grupos do mesmo tipo (eixos do feed)            |
+| Item   | 1.5rem (`py-6`)     | Dentro de um grupo (cards de artigo)                  |
+
+A exceção deliberada: o feed fecha em 1.5rem antes da captura de e-mail, porque
+ela continua a leitura do feed em vez de abrir um bloco novo.
+
+O rodapé não tem margem superior própria. O espaço antes dele é o `py-16` da
+última seção da página — com margem no rodapé, o intervalo virava a soma dos
+dois e cada página fechava num ritmo diferente.
+
+### Estados de hover e foco
+
+A regra, que vale como revisão de código:
+
+> Hover muda superfície, não cor de texto.
+
+- **Links de texto:** underline de 1px passa a 2px. A cor não muda.
+- **Links de navegação:** `fg-muted` passa a `fg` — é ganho de legibilidade no
+  item apontado, não mudança de cor de marca.
+- **Cards (artigo, manifesto):** borda clareia para `border-strong` e o fundo
+  para `surface-hover`. O título **não** muda de cor: um card que troca a cor
+  do texto faz a página piscar enquanto se lê a lista.
+- **Sem transform, sem sombra, sem escala.** Nada se move sob o cursor.
+- **Foco:** `outline` de 2px em acento com 2px de deslocamento, herdado do
+  `:focus-visible` global. Estado de foco nunca é removido em favor do hover.
+
+### Responsivo
+
+Um único breakpoint estrutural: **640px** (`sm`). Abaixo dele:
+
+- a navegação principal colapsa num menu de hambúrguer; logo e seletor de
+  idioma continuam visíveis, porque são o que orienta quem chegou por um link
+  externo;
+- a tabela das 36 verificações de `/quality` vira lista de cards empilhados —
+  mesmo HTML, layout trocado por CSS. Rolagem horizontal esconderia justamente
+  a coluna de remediação;
+- o nome da marca no cabeçalho reduz para "Harness".
+
+Nenhum outro componente muda de estrutura: o layout já é de coluna única.
+
 ### Layout
 
 - Largura máxima do corpo de artigo: `68ch`.
 - Largura máxima de página: `max-w-5xl` (conteúdo geral), `max-w-3xl` (about).
 - Índice lateral (`sticky`) aparece em artigos com mais de um `H2`, acima de `lg`.
+
+### Marca
+
+O logo é o monograma "HE" numa moldura de bússola, com uma rede de nós
+conectados em cobre ao fundo — direção e rede de conhecimento. O arquivo de
+origem é `src/assets/logo.png`, e todo tamanho derivado sai dele pelo pipeline
+de imagem do build.
+
+| Aplicação             | Tamanho  | Observação                                     |
+| --------------------- | -------- | ---------------------------------------------- |
+| Cabeçalho             | 30px     | Ao lado do nome por extenso, não no lugar dele |
+| Marca d'água (rodapé) | 22px     | 14% de opacidade, decorativa                   |
+| `apple-touch-icon`    | 180px    | Gerado no build                                |
+| Manifesto do site     | 192, 512 | Gerados no build                               |
+| OG image              | 64px     | Dentro de `public/og.png`                      |
+
+O favicon **não** usa este arquivo: `public/favicon.svg` é um mark simplificado,
+porque a rede de nós vira ruído ilegível em 16px.
+
+A imagem de compartilhamento social (`public/og.png`, 1200×630) é única para o
+site inteiro, gerada a partir de `scripts/og-image.html`. OG image por artigo,
+com o título de cada um, exigiria satori ou `@vercel/og` — fica para quando o
+volume de artigos justificar a dependência.
+
+### Idiomas na interface
+
+O seletor de idioma fica no cabeçalho, fora do grupo de navegação: idioma não é
+destino de navegação. Compacto ("PT ▾"), abre por clique — nunca por hover — e
+fecha no Escape, ao clicar fora ou ao escolher.
+
+Na Fase 1 do i18n, inglês e espanhol aparecem no menu **desabilitados**, com
+"em breve". Publicar um link para `/en/` antes da tradução existir seria
+publicar um 404. A lista mora em `LOCALES`, em `src/config/site.ts`, e virar a
+flag `available` é o que liga cada idioma. As rotas seguem o
+[ADR 0003](./decisions/0003-url-strategy-for-i18n.md): pt-BR na raiz, os demais
+prefixados.
+
+Inglês e espanhol produzem textos 20–30% mais longos que o português. Nenhum
+componente de texto pode depender de caber numa linha: hero, botões, cards e o
+próprio cabeçalho usam `flex-wrap` e altura automática.
 
 ## 5. Estrutura de páginas (MVP)
 
@@ -127,6 +243,7 @@ que o bloco de código pareça um recorte de outro site.
 | `/quality`           | Resultado do `harness-score` deste repositório, com as falhas visíveis |
 | `/rss.xml`           | Feed completo                                                          |
 | `/sitemap-index.xml` | Gerado por `@astrojs/sitemap`                                          |
+| `/site.webmanifest`  | Manifesto com os ícones de 192 e 512 px, gerados no build              |
 
 ## 6. Plano de conteúdo
 

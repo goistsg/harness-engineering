@@ -10,7 +10,11 @@ const { articles } = Astro.props;
 const groups = groupByAxis(articles);
 ---
 
-<div class="space-y-16">
+{
+  /* 3rem entre eixos: são grupos do mesmo tipo, um degrau abaixo da transição
+    de 4rem que separa blocos diferentes da home. */
+}
+<div class="space-y-12">
   {
     groups.map(({ axis, articles: axisArticles }) => (
       <section aria-labelledby={`eixo-${axis.id}`}>
@@ -28,7 +32,10 @@ const groups = groupByAxis(articles);
           {axisArticles.length > 0 ? (
             axisArticles.map((article) => <ArticleCard article={article} />)
           ) : (
-            <p class="border-border text-fg-muted border-t py-6 font-mono text-sm">
+            /* O mesmo recuo negativo do card de artigo: sem ele, o filete do
+               estado vazio fica 1rem mais estreito que o dos cards e as duas
+               linhas não se alinham na mesma coluna. */
+            <p class="border-border text-fg-muted -mx-4 border-t px-4 py-6 font-mono text-sm">
               Nenhum artigo publicado neste eixo ainda.
             </p>
           )}

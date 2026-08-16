@@ -1,0 +1,52 @@
+---
+/**
+ * Rodapé do site, com o monograma como marca d'água.
+ *
+ * A marca d'água fica em 14% de opacidade: presente quando alguém olha, ausente
+ * na leitura normal. É decoração, então sai da árvore de acessibilidade
+ * (`alt=""` + `aria-hidden`) e nunca cobre um link — mora na coluna vazia à
+ * direita, atrás da lista, com `pointer-events: none`.
+ */
+import { Image } from 'astro:assets';
+import { SITE, AUTHOR } from '@/config/site';
+import logo from '@/assets/logo.png';
+---
+
+{
+  /*
+  Sem margem própria: o degrau de 4rem antes do rodapé vem do `py-16` da última
+  seção de cada página. Com margem aqui, o espaço virava a soma dos dois — 10rem
+  em /quality, 8rem na home — e cada página fechava num ritmo diferente.
+*/
+}
+<footer class="border-border relative border-t">
+  <div
+    class="text-fg-muted mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-base"
+  >
+    <p>{SITE.name} — escrito por {AUTHOR.name}.</p>
+    <ul class="flex flex-wrap items-center gap-5">
+      <li><a href="/rss.xml" class="hover:text-fg no-underline transition-colors">RSS</a></li>
+      <li>
+        <a href="/quality" class="hover:text-fg no-underline transition-colors">Qualidade</a>
+      </li>
+      <li>
+        <a
+          href={SITE.repository}
+          rel="noopener"
+          target="_blank"
+          class="hover:text-fg no-underline transition-colors">Código-fonte</a
+        >
+      </li>
+    </ul>
+  </div>
+
+  <Image
+    src={logo}
+    alt=""
+    aria-hidden="true"
+    densities={[2]}
+    width={22}
+    height={22}
+    class="pointer-events-none absolute end-6 bottom-3 h-[22px] w-[22px] opacity-[0.14]"
+  />
+</footer>

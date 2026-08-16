@@ -1,5 +1,9 @@
 ---
-import { SITE, NAV_LINKS, AUTHOR } from '@/config/site';
+import { getImage } from 'astro:assets';
+import { SITE } from '@/config/site';
+import SiteHeader from '@/components/SiteHeader.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import logo from '@/assets/logo.png';
 import '@/styles/global.css';
 
 // A fonte principal é descoberta tarde, porque o @font-face vem de um CSS
@@ -21,7 +25,12 @@ const { title, description, canonical, ogType = 'website' } = Astro.props;
 
 const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 const pageTitle = title === SITE.title ? title : `${title} — ${SITE.name}`;
-const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+// O ícone de 180px do iOS sai do mesmo PNG de origem do logo, redimensionado
+// pelo pipeline de imagem do build. Um arquivo derivado a menos para manter
+// em sincronia à mão quando a marca mudar.
+const appleTouchIcon = await getImage({ src: logo, width: 180, height: 180, format: 'png' });
+const ogImage = new URL('/og.png', Astro.site).href;
 ---
 
 <!doctype html>
@@ -36,6 +45,8 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
     <link rel="preload" href={interWoff2} as="font" type="font/woff2" crossorigin="anonymous" />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" sizes="180x180" href={appleTouchIcon.src} />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#18181B" />
     <meta name="generator" content={Astro.generator} />
 
@@ -45,7 +56,12 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${SITE.name} — ${SITE.description}`} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
 
     <link
       rel="alternate"
@@ -66,56 +82,12 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
       Pular para o conteúdo
     </a>
 
-    <header class="border-border border-b">
-      <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-x-8 gap-y-3 px-6 py-5">
-        <a href="/" class="text-fg font-mono text-base font-bold tracking-tight">
-          <span class="text-accent">/</span>{SITE.name.toLowerCase().replace(' ', '-')}
-        </a>
-        <nav aria-label="Navegação principal" class="ml-auto">
-          <ul class="flex items-center gap-6 text-base">
-            {
-              NAV_LINKS.map((link) => (
-                <li>
-                  <a
-                    href={link.href}
-                    aria-current={currentPath.startsWith(link.href) ? 'page' : undefined}
-                    class:list={[
-                      'hover:text-fg transition-colors',
-                      currentPath.startsWith(link.href) ? 'text-accent' : 'text-fg-muted',
-                    ]}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))
-            }
-          </ul>
-        </nav>
-      </div>
-    </header>
+    <SiteHeader />
 
     <main id="conteudo" class="flex-1">
       <slot />
     </main>
 
-    <footer class="border-border mt-24 border-t">
-      <div
-        class="text-fg-muted mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-base"
-      >
-        <p>{SITE.name} — escrito por {AUTHOR.name}.</p>
-        <ul class="flex flex-wrap items-center gap-5">
-          <li><a href="/rss.xml" class="hover:text-fg transition-colors">RSS</a></li>
-          <li><a href="/quality" class="hover:text-fg transition-colors">Qualidade</a></li>
-          <li>
-            <a
-              href={SITE.repository}
-              rel="noopener"
-              target="_blank"
-              class="hover:text-fg transition-colors">Código-fonte</a
-            >
-          </li>
-        </ul>
-      </div>
-    </footer>
+    <SiteFooter />
   </body>
 </html>

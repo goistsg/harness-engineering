@@ -1,0 +1,133 @@
+---
+/**
+ * Seletor de idioma — Fase 1 do i18n.
+ *
+ * Abre por clique, nunca por hover: o alvo tem 32px de altura e um menu que
+ * aparece ao passar o mouse seria impossível de usar no toque e hostil no
+ * teclado. Fecha no Escape, ao clicar fora e ao perder o foco.
+ *
+ * Idiomas com `available: false` renderizam como texto desabilitado, não como
+ * link — as rotas `/en` e `/es` ainda não existem (ver LOCALES em
+ * src/config/site.ts).
+ */
+import { LOCALES, DEFAULT_LOCALE } from '@/config/site';
+
+interface Props {
+  /** Prefixo dos ids. Só precisa mudar se houver dois seletores na mesma página. */
+  id?: string;
+}
+
+const { id = 'lang' } = Astro.props;
+const menuId = `${id}-menu`;
+const current = DEFAULT_LOCALE;
+const others = LOCALES.filter((locale) => locale.code !== current.code);
+---
+
+<div class="relative" data-language-switcher>
+  <button
+    type="button"
+    id={id}
+    aria-expanded="false"
+    aria-controls={menuId}
+    aria-label={`Idioma: ${current.label}. Escolher outro idioma`}
+    class="border-border text-fg-muted hover:border-border-strong hover:text-fg flex items-center gap-1.5 rounded border px-2 py-1 font-mono text-sm transition-colors"
+    data-language-trigger
+  >
+    {current.short}
+    <span aria-hidden="true" class="text-xs leading-none">▾</span>
+  </button>
+
+  <div
+    id={menuId}
+    role="menu"
+    aria-labelledby={id}
+    hidden
+    class="border-border bg-surface absolute end-0 top-[calc(100%+0.4rem)] z-30 min-w-40 overflow-hidden rounded border"
+    data-language-menu
+  >
+    <p class="text-fg-muted border-border border-b px-3 py-2 font-mono text-xs">
+      {current.short} · {current.label}
+    </p>
+    <ul>
+      {
+        others.map((locale) => (
+          <li class="border-border border-b last:border-b-0">
+            {locale.available ? (
+              <a
+                href={`${locale.pathPrefix}/`}
+                hreflang={locale.code}
+                lang={locale.code}
+                role="menuitem"
+                class="text-fg hover:bg-bg flex items-baseline gap-2 px-3 py-2 text-base no-underline transition-colors"
+              >
+                <span class="font-mono text-sm">{locale.short}</span>
+                {locale.label}
+              </a>
+            ) : (
+              <p
+                role="menuitem"
+                aria-disabled="true"
+                class="text-fg-muted flex flex-wrap items-baseline gap-x-2 px-3 py-2 text-base"
+              >
+                <span class="font-mono text-sm">{locale.short}</span>
+                <span lang={locale.code}>{locale.label}</span>
+                <span class="text-fg-muted w-full font-mono text-xs">em breve</span>
+              </p>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</div>
+
+<script>
+  // O script é escrito para N seletores na página, não para o único que existe
+  // hoje: o mesmo cabeçalho serve as duas larguras, e um seletor extra em
+  // qualquer outro lugar passa a funcionar sem tocar aqui.
+  const switchers = document.querySelectorAll<HTMLElement>('[data-language-switcher]');
+
+  function close(switcher: HTMLElement): void {
+    const trigger = switcher.querySelector<HTMLButtonElement>('[data-language-trigger]');
+    const menu = switcher.querySelector<HTMLElement>('[data-language-menu]');
+    if (!trigger || !menu) return;
+    trigger.setAttribute('aria-expanded', 'false');
+    menu.hidden = true;
+  }
+
+  function closeAll(): void {
+    for (const switcher of switchers) close(switcher);
+  }
+
+  for (const switcher of switchers) {
+    const trigger = switcher.querySelector<HTMLButtonElement>('[data-language-trigger]');
+    const menu = switcher.querySelector<HTMLElement>('[data-language-menu]');
+    if (!trigger || !menu) continue;
+
+    trigger.addEventListener('click', () => {
+      const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
+      closeAll();
+      trigger.setAttribute('aria-expanded', String(willOpen));
+      menu.hidden = !willOpen;
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    for (const switcher of switchers) {
+      if (!switcher.contains(target)) close(switcher);
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    for (const switcher of switchers) {
+      const trigger = switcher.querySelector<HTMLButtonElement>('[data-language-trigger]');
+      if (trigger?.getAttribute('aria-expanded') === 'true') {
+        close(switcher);
+        trigger.focus();
+      }
+    }
+  });
+</script>

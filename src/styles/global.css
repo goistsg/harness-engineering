@@ -17,6 +17,15 @@
   --color-fg-muted: #a1a1aa;
   --color-border: #3f3f46;
 
+  /*
+   * Estados de hover. São os dois únicos tons que a interface acrescenta à
+   * paleta, e existem porque a regra de hover do sistema é "muda a superfície,
+   * não a cor do texto": um card sob o cursor clareia a borda e o fundo, sem
+   * transform, sem sombra e sem trocar a cor do título.
+   */
+  --color-border-strong: #52525b;
+  --color-surface-hover: #2d2d31;
+
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Fira Code', monospace;
 

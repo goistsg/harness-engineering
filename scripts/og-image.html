@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fonte da OG image — Harness Engineering</title>
+
+    <!--
+      Origem de `public/og.png`, a imagem de compartilhamento social do site.
+
+      Por que um HTML solto e não um componente Astro: gerar a imagem no build
+      exigiria satori ou @vercel/og, e a imagem é uma só — o custo de uma
+      dependência de renderização não se paga por um arquivo que muda quando a
+      marca muda. Quando os artigos ganharem OG image própria, com o título de
+      cada um, aí sim vale trocar isto por geração no build.
+
+      Como regerar depois de editar (a partir da raiz do repositório):
+
+        chromium --headless --disable-gpu --hide-scrollbars \
+          --window-size=1200,630 --default-background-color=00000000 \
+          --screenshot=public/og.png scripts/og-image.html
+
+      Ou abra o arquivo num navegador com a janela em 1200x630 e capture a tela.
+      As fontes vêm de node_modules, então rode `npm install` antes.
+
+      Os tokens de cor estão duplicados aqui de propósito: este arquivo não
+      passa pelo Tailwind. Mudou a paleta em src/styles/global.css, muda aqui e
+      regere a imagem — no mesmo commit.
+    -->
+
+    <style>
+      @font-face {
+        font-family: 'Inter Variable';
+        src: url('../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2')
+          format('woff2-variations');
+        font-weight: 100 900;
+        font-display: block;
+      }
+
+      @font-face {
+        font-family: 'JetBrains Mono';
+        src: url('../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2')
+          format('woff2');
+        font-weight: 400;
+        font-display: block;
+      }
+
+      :root {
+        --color-bg: #18181b;
+        --color-accent: #e05638;
+        --color-fg: #f4f4f5;
+        --color-fg-muted: #a1a1aa;
+        --color-border: #3f3f46;
+      }
+
+      * {
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 80px;
+        background: var(--color-bg);
+        color: var(--color-fg);
+        font-family: 'Inter Variable', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .brand img {
+        width: 64px;
+        height: 64px;
+      }
+
+      .brand span {
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+
+      h1 {
+        max-width: 940px;
+        font-size: 76px;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+      }
+
+      h1 em {
+        color: var(--color-accent);
+        font-style: normal;
+      }
+
+      .axes {
+        display: flex;
+        gap: 32px;
+        padding-top: 28px;
+        border-top: 1px solid var(--color-border);
+        color: var(--color-fg-muted);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 22px;
+        /*
+         * Não é ajuste de gosto: com a caixa de linha justa desta fila flex, a
+         * captura corta o que desce da linha de base — some a cedilha de
+         * "LIDERANÇA" e o rabo do Q de "SQUADS". Num site em português, um
+         * cartão social sem cedilha é erro de ortografia.
+         */
+        line-height: 1.6;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="brand">
+      <img src="../src/assets/logo.png" alt="" />
+      <span>Harness Engineering</span>
+    </div>
+
+    <h1>Engenharia de software com o <em>mecanismo</em> à mostra.</h1>
+
+    <div class="axes">
+      <span>Liderança &amp; Squads</span>
+      <span>IA na Prática</span>
+      <span>Arquitetura &amp; Segurança</span>
+    </div>
+  </body>
+</html>

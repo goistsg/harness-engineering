@@ -31,11 +31,23 @@ const lastEntry = history.at(-1);
   <section aria-labelledby="nivel-atual">
     <h2 id="nivel-atual" class="sr-only">Nível atual</h2>
 
+    {
+      /*
+      Esta é a peça de "prova, não promessa" do site, e a tipografia trabalha
+      para isso: todo valor medido sai em JetBrains Mono com `tabular-nums`, em
+      duas escalas — o nível em 4.5rem, o resto em 1.5rem ou menos. O mono com
+      largura fixa de dígito é o que faz a página parecer instrumento de
+      medição em vez de peça de marketing, e é o que mantém as colunas de
+      números alinhadas quando o valor muda entre builds.
+    */
+    }
     <div class="border-border bg-surface rounded-lg border p-8">
       <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2">
-        <p class="text-accent font-mono text-5xl font-bold">L{score.level.index}</p>
+        <p class="text-accent font-mono text-7xl leading-none font-bold tabular-nums">
+          L{score.level.index}
+        </p>
         <p class="text-2xl font-bold tracking-tight">{score.level.name}</p>
-        <p class="text-fg-muted ml-auto font-mono text-sm">
+        <p class="text-fg-muted ml-auto font-mono text-2xl tabular-nums">
           {score.score.earned}/{score.score.max} pontos · {score.score.percent}%
         </p>
       </div>
@@ -84,12 +96,15 @@ const lastEntry = history.at(-1);
           <li>
             <div class="flex flex-wrap items-baseline justify-between gap-2">
               <span class="font-medium">{dimension.title}</span>
-              <span class="text-fg-muted font-mono text-sm">
+              <span class="text-fg-muted font-mono text-sm tabular-nums">
                 {dimension.earned}/{dimension.max} · {dimension.percent}%
               </span>
             </div>
+            {/* 6px: fina o suficiente para não competir com o nível, alta o
+                suficiente para a diferença entre 87% e 100% ser visível. Sem
+                animação de preenchimento — ver spec/product-spec.md §4. */}
             <div
-              class="bg-border mt-2 h-2 overflow-hidden rounded-full"
+              class="bg-border mt-2 h-1.5 overflow-hidden rounded-full"
               role="img"
               aria-label={`${dimension.title}: ${dimension.percent} por cento`}
             >
@@ -133,7 +148,7 @@ const lastEntry = history.at(-1);
               vector-effect="non-scaling-stroke"
             />
           </svg>
-          <div class="text-fg-muted mt-4 flex justify-between font-mono text-sm">
+          <div class="text-fg-muted mt-4 flex justify-between font-mono text-sm tabular-nums">
             <span>
               {firstEntry.date} · L{firstEntry.level} · {firstEntry.percent}%
             </span>
@@ -156,7 +171,7 @@ const lastEntry = history.at(-1);
     </p>
 
     <div class="mt-8 overflow-x-auto">
-      <table class="w-full border-collapse text-base">
+      <table class="checks-table w-full border-collapse text-base">
         <thead>
           <tr class="border-border border-b text-left">
             <th scope="col" class="text-fg-muted py-2 pr-4 font-mono text-sm font-normal">Check</th>
@@ -171,8 +186,10 @@ const lastEntry = history.at(-1);
           {
             [...failing, ...passing].map((check) => (
               <tr class="border-border border-b align-top">
-                <td class="py-3 pr-4 font-mono text-sm whitespace-nowrap">{check.id}</td>
-                <td class="py-3 pr-4">
+                <td class="py-3 pr-4 font-mono text-sm whitespace-nowrap" data-cell="id">
+                  {check.id}
+                </td>
+                <td class="py-3 pr-4" data-cell="status">
                   <span
                     class:list={[
                       'font-mono text-sm',
@@ -182,10 +199,14 @@ const lastEntry = history.at(-1);
                     {check.passed ? 'passa' : 'falha'}
                   </span>
                 </td>
-                <td class="text-fg-muted py-3 pr-4 font-mono text-sm whitespace-nowrap">
+                <td
+                  class="text-fg-muted py-3 pr-4 font-mono text-sm whitespace-nowrap tabular-nums"
+                  data-cell="points"
+                  data-label="pontos"
+                >
                   {check.earned}/{check.points}
                 </td>
-                <td class="py-3">
+                <td class="py-3" data-cell="detail">
                   <p class="font-medium">{check.title}</p>
                   <p class="text-fg-muted mt-1 text-base">
                     {check.passed ? check.evidence : check.remediation}
@@ -199,3 +220,61 @@ const lastEntry = history.at(-1);
     </div>
   </section>
 </div>
+
+<style>
+  /*
+   * Abaixo de 640px a tabela das 36 verificações vira uma lista de cards
+   * empilhados. Quatro colunas não cabem num telefone, e a alternativa —
+   * rolagem horizontal — esconde justamente a coluna de detalhe, que é onde
+   * mora a remediação de cada verificação reprovada.
+   *
+   * O HTML é o mesmo nas duas larguras: uma tabela de verdade, com <thead>,
+   * que só troca de layout por CSS. Duplicar a lista em duas marcações
+   * duplicaria as 36 linhas no HTML entregue.
+   */
+  @media (max-width: 639px) {
+    .checks-table thead {
+      display: none;
+    }
+
+    .checks-table,
+    .checks-table tbody {
+      display: block;
+    }
+
+    .checks-table tr {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      column-gap: 0.75rem;
+      row-gap: 0.35rem;
+      border: 1px solid var(--color-border);
+      border-radius: 0.5rem;
+      padding: 0.85rem 1rem;
+    }
+
+    .checks-table tr + tr {
+      margin-block-start: 0.75rem;
+    }
+
+    .checks-table td {
+      display: block;
+      padding: 0;
+    }
+
+    /* O detalhe ocupa a linha inteira; id, status e pontos dividem a de cima. */
+    .checks-table td[data-cell='detail'] {
+      flex-basis: 100%;
+      margin-block-start: 0.15rem;
+    }
+
+    /*
+     * Sem o cabeçalho da tabela, "0/3" perde a coluna que dizia o que ele é.
+     * O rótulo volta como texto gerado, apenas nesta largura.
+     */
+    .checks-table td[data-label]::before {
+      content: attr(data-label) ' ';
+      color: var(--color-fg-muted);
+    }
+  }
+</style>
