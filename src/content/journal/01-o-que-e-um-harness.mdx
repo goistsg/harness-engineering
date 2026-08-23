@@ -1,0 +1,208 @@
+---
+title: O que é um harness e como sair do zero hoje
+description: Harness é o arcabouço que restringe e avalia um agente de código. Aqui está a definição, o primeiro scan de um repositório real e o que corrigir primeiro.
+pubDate: 2026-08-23
+axis: ia-na-pratica
+tags: ['harness', 'harness-score', 'agentes', 'maturidade']
+draft: false
+---
+
+import Callout from '@/components/Callout.astro';
+
+A discussão sobre IA em engenharia quase sempre para na escolha do modelo.
+Enquanto isso, o repositório onde o agente vai trabalhar segue sem uma linha de
+instrução, sem limite declarado e sem nenhum teste que reprove o que ele
+produzir.
+
+O modelo é a parte que você não controla. O repositório é a parte que você
+controla — e é a que quase ninguém mede.
+
+## O que é um harness, afinal?
+
+Harness é o conjunto de arquivos, regras, testes e gates que um repositório
+oferece a um agente de código para que ele saiba o que fazer e seja impedido de
+fazer o que não deve.
+
+O termo vem de _test harness_: a estrutura que executa um código sob condições
+controladas para provar que ele funciona. Ninguém confia em uma função porque
+ela parece correta. Confia porque existe um arcabouço em volta dela que falha
+quando ela erra.
+
+Com um agente vale o mesmo raciocínio, com um agravante. A saída de um modelo é
+não-determinística: o mesmo prompt, no mesmo repositório, produz respostas
+diferentes. Isso não é motivo para abandonar o arcabouço — é o motivo pelo qual
+ele passa a importar mais. Quando a saída varia, a única coisa que pode
+permanecer constante é o que a cerca.
+
+Um harness responde três perguntas, e todas antes de o agente escrever a
+primeira linha:
+
+- **O que este projeto é?** Contexto, arquitetura, comandos de build e teste.
+- **O que aqui não se negocia?** Convenções, limites de módulo, decisões
+  travadas.
+- **O que reprova o resultado?** Lint, tipos, testes, gates de CI.
+
+Repositório sem essas três respostas não está pronto para um agente. Está pronto
+para produzir código plausível que ninguém consegue verificar.
+
+## E o que é o harness-score?
+
+Harness é a prática. O [harness-score](https://github.com/paladini/harness-score)
+é uma implementação determinística que mede uma parte dela: 36 verificações
+objetivas em seis dimensões, 108 pontos possíveis, e um nível de maturidade de
+L0 a L4.
+
+Determinística é a palavra que importa. A varredura lê o sistema de arquivos e
+faz parsing. Não chama modelo, não acessa rede, não envia telemetria. Rodar duas
+vezes no mesmo commit devolve o mesmo número — que é a condição mínima para
+alguma coisa virar gate de CI.
+
+Este site roda a ferramenta a cada push e publica o resultado em
+[/quality](/quality). O [manifesto](/journal/manifesto) explica por que uma
+regressão de nível reprova o build aqui. Este artigo trata do problema anterior:
+o que fazer quando você ainda não tem número nenhum.
+
+## Por que o primeiro score sempre é pior do que você espera?
+
+Porque as verificações medem artefatos que existem para o agente ler — e
+praticamente nenhum repositório foi escrito com um agente como leitor.
+
+Criei um repositório mínimo para demonstrar, com o que um serviço Node comum tem
+no primeiro dia: `package.json` com `test` e `lint`, um `README.md`, e código em
+`src/`.
+
+```bash
+npx harness-score@1.6.0 .
+```
+
+```text
+  harness-score v1.6.0  /tmp/billing-api
+
+  Maturity: L0 · Unharnessed   Score: 18/108 (17%)   scopes: repo
+
+  Context & Guides     ██░░░░░░░░░░░░░░░░░░  10%  2/20 pts
+  Skills & Commands    ░░░░░░░░░░░░░░░░░░░░   0%  0/17 pts
+  Hooks & Guardrails   ░░░░░░░░░░░░░░░░░░░░   0%  0/14 pts
+  Sensors & Feedback   ██████░░░░░░░░░░░░░░  30%  6/20 pts
+  CI Feedback          ░░░░░░░░░░░░░░░░░░░░   0%  0/14 pts
+  Hygiene & Safety     █████████░░░░░░░░░░░  43%  10/23 pts
+
+  Improvements (30):
+   ✗ CTX-01 Agent context file present (AGENTS.md) (+4 pts)
+   ✗ CTX-02 Agent context file is substantive (+3 pts)
+   ✗ CTX-03 Scoped rules in use (+4 pts)
+   ...
+```
+
+Dezoito de cento e oito pontos. Trinta correções abertas. Três dimensões zeradas.
+
+Esse resultado não diz que o projeto é ruim. Um serviço pode ter testes bons,
+observabilidade decente e nenhum incidente aberto, e ainda assim pontuar 17% —
+porque nada disso está escrito em um lugar onde um agente encontre antes de
+começar a trabalhar.
+
+<Callout type="insight" title="O ponto que interessa">
+  O primeiro score não mede a qualidade do seu código. Mede o quanto do seu conhecimento sobre o
+  projeto está fora da cabeça das pessoas.
+</Callout>
+
+## O que atacar primeiro quando tudo está reprovado?
+
+O instinto diante da lista de itens reprovados no primeiro scan é ordenar por
+pontos e começar pelo mais barato. É o critério errado. Ele produz ganho de
+pontuação sem mudança de comportamento — exatamente o tipo de otimização que faz
+uma métrica perder sentido em três sprints.
+
+O critério certo é o **gate de nível**. Cada promoção exige percentuais mínimos
+em dimensões específicas, e a ferramenta informa quais:
+
+| De → para | O que a promoção exige                                            |
+| --------- | ----------------------------------------------------------------- |
+| L0 → L1   | `context ≥ 40%`                                                   |
+| L1 → L2   | `context ≥ 60%`; `skills ≥ 30%` ou `hooks ≥ 30%`; `hygiene ≥ 50%` |
+
+Sair do L0 depende de uma dimensão só. E dentro dela, dois dos checks apontam
+para o mesmo arquivo: `CTX-01` pede um `AGENTS.md` na raiz, `CTX-02` pede que ele
+seja substantivo — ao menos 20 linhas úteis e 2 headings.
+
+Escrevi esse arquivo. Cerca de trinta linhas: o que o serviço é, como buildar e
+testar, os limites entre `routes/`, `domain/` e `db/`, e as convenções que não se
+negociam.
+
+```markdown
+## Convenções
+
+- Toda rota nova precisa de teste de integração.
+- Valor monetário é inteiro em centavos. Nunca float.
+- Migration é imutável depois de mergeada. Correção é nova migration.
+```
+
+Novo scan, mesmo repositório, nenhuma linha de código de produção alterada:
+
+```text
+  Maturity: L1 · Documented   Score: 25/108 (23%)   scopes: repo
+
+  Context & Guides     █████████░░░░░░░░░░░  45%  9/20 pts
+```
+
+De 18 para 25 pontos. De L0 para L1. Um arquivo, uma tarde.
+
+O ganho de sete pontos não é o resultado relevante. O relevante é que o
+`AGENTS.md` é o arquivo do qual as outras cinco dimensões dependem: uma skill
+sem contexto declarado não tem o que reforçar, e um hook que bloqueia uma
+convenção que ninguém escreveu vira ruído que o time aprende a contornar.
+
+## Quando parar de subir?
+
+Aqui vai a parte que contraria o formato de todo scorecard: **o objetivo não é
+L4.**
+
+| Nível | Nome            | O que caracteriza                         |
+| ----- | --------------- | ----------------------------------------- |
+| L0    | Unharnessed     | O agente trabalha sem contexto declarado  |
+| L1    | Documented      | O projeto se explica por escrito          |
+| L2    | Guided          | Existem workflows e limites explícitos    |
+| L3    | Sensing         | O repositório mede a si mesmo             |
+| L4    | Self-correcting | O gate reprova a regressão antes do merge |
+
+Pela tabela de gates, a maior parte do retorno está entre L0 e L2. É a faixa
+onde o agente para de inventar convenção, para de importar o que não devia e
+para de propor mudanças que o time descarta na review. Passar de L3 para L4
+exige infraestrutura de CI que nem todo repositório justifica — um serviço
+interno com dois commits por mês não paga esse custo.
+
+Este site está em L4 com 105 de 108 pontos, e está lá porque a tese que ele
+defende exige isso dele. É um caso particular, não um alvo universal.
+
+<Callout type="warning" title="A armadilha previsível">
+  No momento em que o número vira meta, ele para de ser medida. Score existe para informar a próxima
+  decisão, não para comparar repositórios em um ranking.
+</Callout>
+
+## O que fazer na próxima hora
+
+Três passos, nesta ordem:
+
+1. Rode `npx harness-score@1.6.0 .` no repositório que mais te incomoda hoje.
+   A varredura é local e não altera nada.
+2. Ignore os trinta itens. Olhe só a linha `To reach L{n+1}` no fim do relatório
+   e escolha **uma** dimensão.
+3. Guarde o relatório como baseline com `--json`. Sem baseline você não consegue
+   provar movimento depois — e `--diff` compara contra ele.
+
+O gate de CI (`--min-level`) vem depois, e só faz sentido quando o time já
+concordou com o nível atual. Ligar gate antes disso é impor uma régua que
+ninguém aceitou.
+
+<Callout type="note" title="O que este artigo ainda não tem">
+  Os exemplos aqui vêm de um repositório de demonstração e deste site. Estou implementando o
+  harness-score nos dois squads que lidero agora, e ainda não tenho dado de uso real em time. Quando
+  tiver, publico — com o número, inclusive se ele for inconveniente.
+</Callout>
+
+Harness não é uma ferramenta que se instala. É o arcabouço que transforma a saída
+de um agente em algo verificável, e ele começa a existir no momento em que o
+conhecimento sobre o projeto sai da conversa e vira arquivo. O score apenas
+informa a distância entre onde você está e esse ponto.
+
+Dezoito de cento e oito é um lugar honesto para começar. Não medir é pior.
