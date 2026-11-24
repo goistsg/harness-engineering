@@ -2,6 +2,7 @@
 title: O que é um harness e como sair do zero hoje
 description: Harness é o arcabouço que restringe e avalia um agente de código. Aqui está a definição, o primeiro scan de um repositório real e o que corrigir primeiro.
 pubDate: 2026-08-23
+updatedDate: 2026-11-24
 axis: ia-na-pratica
 tags: ['harness', 'harness-score', 'agentes', 'maturidade']
 draft: false
@@ -49,8 +50,9 @@ para produzir código plausível que ninguém consegue verificar.
 
 Harness é a prática. O [harness-score](https://github.com/paladini/harness-score)
 é uma implementação determinística que mede uma parte dela: 36 verificações
-objetivas em seis dimensões, 108 pontos possíveis, e um nível de maturidade de
-L0 a L4.
+objetivas em seis dimensões, até 108 pontos, e um nível de maturidade de L0 a
+L4. Verificação que não se aplica ao repositório sai da conta, por isso o total
+de cada scan pode ser menor que 108.
 
 Determinística é a palavra que importa. A varredura lê o sistema de arquivos e
 faz parsing. Não chama modelo, não acessa rede, não envia telemetria. Rodar duas
@@ -72,32 +74,33 @@ no primeiro dia: `package.json` com `test` e `lint`, um `README.md`, e código e
 `src/`.
 
 ```bash
-npx harness-score@1.6.0 .
+npx harness-score@1.10.0 .
 ```
 
 ```text
-  harness-score v1.6.0  /tmp/billing-api
+  harness-score v1.10.0  /tmp/billing-api
 
-  Maturity: L0 · Unharnessed   Score: 18/108 (17%)   scopes: repo
+  Maturity: L0 · Unharnessed   Score: 28/105 (27%)   scopes: repo
 
   Context & Guides     ██░░░░░░░░░░░░░░░░░░  10%  2/20 pts
   Skills & Commands    ░░░░░░░░░░░░░░░░░░░░   0%  0/17 pts
   Hooks & Guardrails   ░░░░░░░░░░░░░░░░░░░░   0%  0/14 pts
-  Sensors & Feedback   ██████░░░░░░░░░░░░░░  30%  6/20 pts
+  Sensors & Feedback   ███████████░░░░░░░░░  55%  11/20 pts
   CI Feedback          ░░░░░░░░░░░░░░░░░░░░   0%  0/14 pts
-  Hygiene & Safety     █████████░░░░░░░░░░░  43%  10/23 pts
+  Hygiene & Safety     ███████████████░░░░░  75%  15/20 pts
 
-  Improvements (30):
+  Improvements (26):
    ✗ CTX-01 Agent context file present (AGENTS.md) (+4 pts)
    ✗ CTX-02 Agent context file is substantive (+3 pts)
    ✗ CTX-03 Scoped rules in use (+4 pts)
    ...
 ```
 
-Dezoito de cento e oito pontos. Trinta correções abertas. Três dimensões zeradas.
+Vinte e oito de cento e cinco pontos. Vinte e seis correções abertas. Três
+dimensões zeradas.
 
 Esse resultado não diz que o projeto é ruim. Um serviço pode ter testes bons,
-observabilidade decente e nenhum incidente aberto, e ainda assim pontuar 17% —
+observabilidade decente e nenhum incidente aberto, e ainda assim pontuar 27% —
 porque nada disso está escrito em um lugar onde um agente encontre antes de
 começar a trabalhar.
 
@@ -140,12 +143,12 @@ negociam.
 Novo scan, mesmo repositório, nenhuma linha de código de produção alterada:
 
 ```text
-  Maturity: L1 · Documented   Score: 25/108 (23%)   scopes: repo
+  Maturity: L1 · Documented   Score: 35/105 (33%)   scopes: repo
 
   Context & Guides     █████████░░░░░░░░░░░  45%  9/20 pts
 ```
 
-De 18 para 25 pontos. De L0 para L1. Um arquivo, uma tarde.
+De 28 para 35 pontos. De L0 para L1. Um arquivo, uma tarde.
 
 O ganho de sete pontos não é o resultado relevante. O relevante é que o
 `AGENTS.md` é o arquivo do qual as outras cinco dimensões dependem: uma skill
@@ -171,8 +174,8 @@ para de propor mudanças que o time descarta na review. Passar de L3 para L4
 exige infraestrutura de CI que nem todo repositório justifica — um serviço
 interno com dois commits por mês não paga esse custo.
 
-Este site está em L4 com 105 de 108 pontos, e está lá porque a tese que ele
-defende exige isso dele. É um caso particular, não um alvo universal.
+Este site está em L4 com 105 de 105 pontos aplicáveis no scan de 24/11/2026,
+feito com a v1.10.0, e está lá porque a tese que ele defende exige isso dele. É um caso particular, não um alvo universal.
 
 <Callout type="warning" title="A armadilha previsível">
   No momento em que o número vira meta, ele para de ser medida. Score existe para informar a próxima
@@ -183,9 +186,9 @@ defende exige isso dele. É um caso particular, não um alvo universal.
 
 Três passos, nesta ordem:
 
-1. Rode `npx harness-score@1.6.0 .` no repositório que mais te incomoda hoje.
+1. Rode `npx harness-score@1.10.0 .` no repositório que mais te incomoda hoje.
    A varredura é local e não altera nada.
-2. Ignore os trinta itens. Olhe só a linha `To reach L{n+1}` no fim do relatório
+2. Ignore a lista de correções. Olhe só a linha `To reach L{n+1}` no fim do relatório
    e escolha **uma** dimensão.
 3. Guarde o relatório como baseline com `--json`. Sem baseline você não consegue
    provar movimento depois — e `--diff` compara contra ele.
@@ -196,8 +199,8 @@ ninguém aceitou.
 
 <Callout type="note" title="O que este artigo ainda não tem">
   Os exemplos aqui vêm de um repositório de demonstração e deste site. Estou implementando o
-  harness-score nos dois squads que lidero agora, e ainda não tenho dado de uso real em time. Quando
-  tiver, publico — com o número, inclusive se ele for inconveniente.
+  harness-score nos times que lidero, e ainda não tenho dado de uso real em time. Quando tiver,
+  publico — com o número, inclusive se ele for inconveniente.
 </Callout>
 
 Harness não é uma ferramenta que se instala. É o arcabouço que transforma a saída
@@ -205,4 +208,4 @@ de um agente em algo verificável, e ele começa a existir no momento em que o
 conhecimento sobre o projeto sai da conversa e vira arquivo. O score apenas
 informa a distância entre onde você está e esse ponto.
 
-Dezoito de cento e oito é um lugar honesto para começar. Não medir é pior.
+Vinte e sete por cento é um lugar honesto para começar. Não medir é pior.
