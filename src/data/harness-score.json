@@ -1,9 +1,9 @@
 {
   "source": "scan",
-  "scannedAt": "2026-08-09T13:49:19.299Z",
+  "scannedAt": "2026-11-24T03:04:22.110Z",
   "tool": {
     "name": "harness-score",
-    "version": "1.5.2"
+    "version": "1.10.0"
   },
   "level": {
     "index": 4,
@@ -12,8 +12,8 @@
   },
   "score": {
     "earned": 105,
-    "max": 108,
-    "percent": 97
+    "max": 105,
+    "percent": 100
   },
   "dimensions": [
     {
@@ -55,8 +55,8 @@
       "id": "hygiene",
       "title": "Hygiene & Safety",
       "earned": 20,
-      "max": 23,
-      "percent": 87
+      "max": 20,
+      "percent": 100
     }
   ],
   "checks": [
@@ -68,7 +68,7 @@
       "earned": 4,
       "passed": true,
       "evidence": "Found AGENTS.md at repository root.",
-      "remediation": "Create an AGENTS.md at the repository root describing what the project is, how to build/test it, and the conventions agents must follow."
+      "remediation": "Create an AGENTS.md or AGENT.md at the repository root describing what the project is, how to build/test it, and the conventions agents must follow."
     },
     {
       "id": "CTX-02",
@@ -88,7 +88,7 @@
       "earned": 4,
       "passed": true,
       "evidence": "Found 3 rule(s) (cursor): .cursor/rules/astro-components.mdc, .cursor/rules/content-authoring.mdc, .cursor/rules/spec-sync.mdc",
-      "remediation": "Add at least one scoped rule file for your AI tool (e.g. .cursor/rules/*.mdc, .windsurf/rules/*.md, .clinerules/*.md) or a nested AGENTS.md/CLAUDE.md in a subdirectory, stating the project non-negotiables."
+      "remediation": "Add at least one rule file for your AI tool (e.g. .cursor/rules/*.mdc, .windsurf/rules/*.md, .cline/rules/*.md, .devin/rules/*.md, .github/instructions/*.instructions.md, or .rules) or a nested AGENTS.md/CLAUDE.md in a subdirectory, stating the project non-negotiables."
     },
     {
       "id": "CTX-04",
@@ -148,7 +148,7 @@
       "earned": 4,
       "passed": true,
       "evidence": "Found 2 skill(s) (claude-code): .claude/skills/new-article/SKILL.md, .claude/skills/quality-gate/SKILL.md",
-      "remediation": "Create a SKILL.md under your tool skills directory (.cursor/skills/, .claude/skills/, or .agents/skills/) packaging a procedural workflow the agent should follow on demand."
+      "remediation": "Create a SKILL.md under your tool skills directory (.cursor/skills/, .claude/skills/, .cline/skills/, .devin/skills/, .opencode/skills/, .github/skills/, or .agents/skills/) packaging a procedural workflow the agent should follow on demand."
     },
     {
       "id": "SKL-02",
@@ -168,7 +168,7 @@
       "earned": 3,
       "passed": true,
       "evidence": "Found 1 command/workflow(s) (claude-code): .claude/commands/new-article.md",
-      "remediation": "Add explicit workflow/command entry points (.cursor/commands/, .windsurf/workflows/, .claude/commands/, .continue/prompts/, …) for workflows you trigger intentionally."
+      "remediation": "Add explicit workflow/command entry points (.cursor/commands/, .windsurf/workflows/, .claude/commands/, .continue/prompts/, .github/prompts/, .opencode/commands/, .devin/workflows/, …) for workflows you trigger intentionally."
     },
     {
       "id": "SKL-04",
@@ -207,18 +207,18 @@
       "points": 4,
       "earned": 4,
       "passed": true,
-      "evidence": ".claude/settings.json parses as JSON.",
-      "remediation": "Create a hooks configuration (.cursor/hooks.json or .claude/settings.json hooks key) — hooks are the harness layer that can observe and control the agent loop deterministically."
+      "evidence": ".claude/settings.json contains a parseable hooks configuration.",
+      "remediation": "Create a hooks configuration (.cursor/hooks.json, .claude/settings.json hooks key, .github/hooks/*.json, .codex/hooks.json, or Devin .devin/hooks.v1.json) — hooks are the harness layer that can observe and control the agent loop deterministically."
     },
     {
       "id": "HKS-02",
       "dimension": "hooks",
-      "title": "Hooks use known events and a version field",
+      "title": "Hook events and handlers are structurally valid",
       "points": 2,
       "earned": 2,
       "passed": true,
       "evidence": ".claude/settings.json: events: PreToolUse, PostToolUse.",
-      "remediation": "Register handlers only on documented events for your tool (Cursor: beforeShellExecution, afterFileEdit, …; Claude Code: PreToolUse, PostToolUse, …) — typos fail silently."
+      "remediation": "Declare at least one structurally valid hook event and every metadata field required by your tool; unrecognized future events are reported as warnings."
     },
     {
       "id": "HKS-03",
@@ -228,7 +228,7 @@
       "earned": 4,
       "passed": true,
       "evidence": "Gate hook(s) registered on: PreToolUse.",
-      "remediation": "Register a gate hook (Cursor: beforeShellExecution / beforeMCPExecution / preToolUse; Claude Code: PreToolUse) that returns allow/deny/ask for destructive operations."
+      "remediation": "Register a gate hook (Cursor: beforeShellExecution / beforeMCPExecution / preToolUse / beforeReadFile; Claude Code, Codex, Devin, or Copilot: PreToolUse / PermissionRequest / preToolUse) that guards destructive operations."
     },
     {
       "id": "HKS-04",
@@ -238,7 +238,7 @@
       "earned": 2,
       "passed": true,
       "evidence": "Feedback hook(s) registered on: PostToolUse.",
-      "remediation": "Register a feedback hook (Cursor: afterFileEdit / postToolUse / stop; Claude Code: PostToolUse) — e.g. auto-format edited files or run a quick lint."
+      "remediation": "Register a feedback hook (Cursor: afterFileEdit / postToolUse / stop; Claude Code/Codex: PostToolUse; Devin: PostToolUse / Stop; Copilot: postToolUse / agentStop) — e.g. auto-format edited files or run a quick lint."
     },
     {
       "id": "HKS-05",
@@ -247,7 +247,7 @@
       "points": 2,
       "earned": 2,
       "passed": true,
-      "evidence": "All 2 path-referencing hook command(s) resolve to committed files.",
+      "evidence": "All 2 repository path reference(s) resolve to committed files.",
       "remediation": "Commit the scripts referenced by your hooks config — a hook pointing at a missing script fails open on every machine but yours."
     },
     {
@@ -258,7 +258,7 @@
       "earned": 6,
       "passed": true,
       "evidence": "package.json test script: \"vitest run\"; vitest in package.json; vitest.config.ts.",
-      "remediation": "Wire up a test runner (vitest/jest, pytest, go test, cargo test…) with a standard entry point — tests are the strongest feedback sensor an agent can run on its own work."
+      "remediation": "Wire up a test runner (vitest/jest, pytest, go test, cargo test, node --test…) with a standard entry point — tests are the strongest feedback sensor an agent can run on its own work."
     },
     {
       "id": "SNS-02",
@@ -278,7 +278,7 @@
       "earned": 4,
       "passed": true,
       "evidence": "tsconfig.json (strict: true).",
-      "remediation": "Enable static type checking (tsconfig.json with strict: true, mypy/pyright for Python) — typed code is dramatically more harnessable: the compiler catches agent mistakes for free."
+      "remediation": "Enable static type checking (tsconfig.json with strict: true, mypy/pyright/ty for Python) — typed code is dramatically more harnessable: the compiler catches agent mistakes for free."
     },
     {
       "id": "SNS-04",
@@ -317,7 +317,7 @@
       "points": 4,
       "earned": 4,
       "passed": true,
-      "evidence": "CI invokes tests (\"test\").",
+      "evidence": "CI invokes tests (\"npm test\").",
       "remediation": "Make CI execute the test suite (npm test, pytest, go test…) so no agent-authored change can merge without the sensors firing."
     },
     {
@@ -327,7 +327,7 @@
       "points": 3,
       "earned": 3,
       "passed": true,
-      "evidence": "CI invokes static checks (\"Lint\").",
+      "evidence": "CI invokes static checks (\"lint\").",
       "remediation": "Add lint and typecheck steps to CI — cheap computational sensors belong on every push (\"keep quality left\")."
     },
     {
@@ -378,7 +378,7 @@
       "earned": 4,
       "passed": true,
       "evidence": "No MCP config in repository (nothing to leak).",
-      "remediation": "Never inline API keys in MCP config (.cursor/mcp.json, .mcp.json, .agents/mcp_config.json) — use ${VAR} interpolation and document required variables in .env.example."
+      "remediation": "Never inline API keys in MCP config (.cursor/mcp.json, .mcp.json, .agents/mcp_config.json, .continue/mcpServers/, .vscode/mcp.json, opencode.json, or Devin MCP config) — use environment interpolation and document required variables in .env.example."
     },
     {
       "id": "HYG-05",
@@ -417,7 +417,7 @@
       "points": 3,
       "earned": 0,
       "passed": false,
-      "evidence": "No MCP config found (.cursor/mcp.json, .mcp.json, or .agents/mcp_config.json).",
+      "evidence": "No MCP config is in use; HYG-08 does not apply.",
       "remediation": "Reference credential-shaped values in MCP config via ${ENV_VAR} interpolation instead of literals — this rewards deliberate, safe tool-access configuration."
     }
   ]
